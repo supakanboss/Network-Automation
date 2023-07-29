@@ -18,7 +18,7 @@ def filter_group(nr):
 
 def show_data(filtered_nr, password):
     
-    show_interfaces_command = f"enable\n{password}\nshow int"
+    show_interfaces_command = f"enable\n{password}\nshow interface"
     
     result = filtered_nr.run(task=send_command, command=show_interfaces_command)
     print_result(result)
@@ -43,32 +43,32 @@ def set_vlan(filtered_nr, password):
         set_vlan_command += f"vlan {vlan_num}\n"
         set_vlan_command += f"name {vlan_name}\n"
         set_vlan_command += f"ex\n"
-        set_vlan_command += f"int ra {interface}\n"
-        set_vlan_command += f"sw mode acc\n"
-        set_vlan_command += f"sw acc vlan {vlan_num}\n"
+        set_vlan_command += f"interface range {interface}\n"
+        set_vlan_command += f"switch mode access\n"
+        set_vlan_command += f"switch access vlan {vlan_num}\n"
     
     elif action == "2":
         vlan_num = input("Enter the VLAN Number: ")
         interface = input("Enter the Interface (ex. f1/1): ")
         
-        set_vlan_command += f"int {interface}\n"
-        set_vlan_command += f"sw mode trunk\n"
-        set_vlan_command += f"sw trunk allowed vlan {vlan_num}\n"
+        set_vlan_command += f"interface {interface}\n"
+        set_vlan_command += f"switch mode trunk\n"
+        set_vlan_command += f"switch trunk allowed vlan {vlan_num}\n"
     
     elif action == "3":
         vlan_num = input("Enter the Native VLAN Number: ")
         interface = input("Enter the Trunk Interface (ex. f1/1): ")   
         
-        set_vlan_command += f"int {interface}\n"
-        set_vlan_command += f"sw trunk native vlan {vlan_num}\n"
+        set_vlan_command += f"interface {interface}\n"
+        set_vlan_command += f"switch trunk native vlan {vlan_num}\n"
     
     elif action == "4":
         vlan_num = input("Enter the VLAN Number: ")
         network_addresses = input("Enter the IP address: ")
         subnet = input("Enter the Subnet mask: ")
         
-        set_vlan_command += f"int vlan {vlan_num}\n"
-        set_vlan_command += f"ip add {network_addresses} {subnet}\n"
+        set_vlan_command += f"interface vlan {vlan_num}\n"
+        set_vlan_command += f"ip address {network_addresses} {subnet}\n"
     
     elif action == "5":
         return
@@ -82,14 +82,15 @@ def set_ether_channel(filtered_nr, password):
     interface = input("Enter the Interface (ex. f1/1-12): ")
     channel_group_number = input("Enter the Channel group number: ")
     vlan_num = input("Enter the VLAN Number: ")
+    
     set_ether_channel_command = f"enable\n{password}\nconf t\n"
     
-    set_ether_channel_command += f"int ra {interface}\n"
+    set_ether_channel_command += f"int range {interface}\n"
     set_ether_channel_command += f"channel-group {channel_group_number} mode active\n"
     set_ether_channel_command += f"ex\n"
-    set_ether_channel_command += f"int port-channle {channel_group_number}\n"
-    set_ether_channel_command += f"sw mode trunk\n"
-    set_ether_channel_command += f"sw trunk allowed vlan {vlan_num}\n"
+    set_ether_channel_command += f"interface port-channle {channel_group_number}\n"
+    set_ether_channel_command += f"switch mode trunk\n"
+    set_ether_channel_command += f"switch trunk allowed vlan {vlan_num}\n"
     
     result = filtered_nr.run(task=send_command, command=set_ether_channel_command)
     print_result(result)
@@ -100,6 +101,7 @@ def set_static_routing(filtered_nr, password):
     network_addresses = input("Enter the Network addresses: ")
     subnet = input("Enter the Subnet mask: ")
     next_hop = input("Enter the Next hop: ")
+    
     routing_command = f"enable\n{password}\nconf t\n"
     routing_command += f"ip route {network_addresses} {subnet} {next_hop}\n"
     
@@ -125,6 +127,7 @@ def set_dynamic_routing(filtered_nr, password):
         
         router_ospf_process = input("Enter the Router OSPF process number: ")
         router_id = input("Enter the Router ID (ex. 1.1.1.1): ")
+        
         routing_command += f"router ospf {router_ospf_process}\n"
         routing_command += f"router-id {router_id}\n"
     
@@ -178,6 +181,60 @@ def set_dynamic_routing(filtered_nr, password):
         return
     
     result = filtered_nr.run(task=send_command, command=routing_command)
+    print_result(result)
+    filtered_nr.close_connections()
+
+def set_dhcp(filtered_nr, password):
+    print("********************\n")
+    print("1 - Set DHCP Pool\n")
+    print("2 - Set Excluded IP Address\n")
+    print("3 - Optional Default Router\n")
+    print("4 - Optional DNS Server\n")
+    print("5 - Optional Set the lease duration for clients in minutes\n")
+    print("6 - Back\n")
+    print("********************")
+    action = input("Choose action : ")
+    dhcp_command = f"enable\n{password}\nconf t\n"
+    
+    if action == "1":
+        dhcp_pool_name = input("Enter the DHCP Pool Name: ")
+        network_address = input("Enter the Network Address: ")
+        subnet = input("Enter the Subnet mask: ")
+        
+        dhcp_command += f"ip dhcp pool {dhcp_pool_name}\n"
+        dhcp_command += f"network {network_address} {subnet}\n"
+    
+    elif action == "2":
+        network_address = input("Enter the Network Address (comma-separated): ").split(',')
+        
+        for network_address in zip(network_address):
+            dhcp_command += f"ip dhcp excluded-address {network_address.strip()}\n"
+    
+    if action == "3":
+        dhcp_pool_name = input("Enter the DHCP Pool Name: ")
+        default_router_ip_address = ("Enter the Default Gateway IP Address: ")
+        
+        dhcp_command += f"ip dhcp pool {dhcp_pool_name}\n"
+        dhcp_command += f"default-router {default_router_ip_address}\n"
+    
+    if action == "4":
+        dhcp_pool_name = input("Enter the DHCP Pool Name: ")
+        dns_server_ip_address = ("Enter the DNS Server IP Address: ")
+        
+        dhcp_command += f"ip dhcp pool {dhcp_pool_name}\n"
+        dhcp_command += f"dns-server {dns_server_ip_address}\n"
+    
+    if action == "5":
+        dhcp_pool_name = input("Enter the DHCP Pool Name: ")
+        lease_duration_minutes = ("Enter the Lease Duration Minutes: ")
+        
+        dhcp_command += f"ip dhcp pool {dhcp_pool_name}\n"
+        dhcp_command += f"lease {lease_duration_minutes}\n"
+    
+    if action == "6":
+        return
+    
+    result = filtered_nr.run(task=send_command, command=dhcp_command)
     print_result(result)
     filtered_nr.close_connections()
 
@@ -266,8 +323,9 @@ def main():
         print("3 - Set Ether Channel\n")
         print("4 - Set Static  Routing\n")
         print("5 - Set Dynamic Routing\n")
-        print("6 - Set NAT/PAT\n")
-        print("7 - Exit\n")
+        print("6 - Set DHCP\n")
+        print("7 - Set NAT/PAT\n")
+        print("8 - Exit\n")
         print("********************")        
         user_action = input("Choose action : ")
         
@@ -287,9 +345,12 @@ def main():
             set_dynamic_routing(filtered_nr, password)
         
         elif user_action == "6":
-            set_nat_pat(filtered_nr, password)
+            set_dhcp(filtered_nr, password)
         
         elif user_action == "7":
+            set_nat_pat(filtered_nr, password)
+        
+        elif user_action == "8":
             print("Exiting program...")
             break
         
