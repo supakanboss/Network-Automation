@@ -31,6 +31,7 @@ def set_ipv4(filtered_nr, password):
     subnet = input("Enter the Subnet mask: ")
     set_ipv4_command = f"enable\n{password}\nconf t\n"
     
+    set_ipv4_command += f"ip routing\n"
     set_ipv4_command += f"interface {interface}\n"
     set_ipv4_command += f"no shutdown\n"
     set_ipv4_command += f"no switchport\n"
