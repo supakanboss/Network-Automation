@@ -24,12 +24,28 @@ def show_data(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
+def set_ipv4(filtered_nr, password):
+        
+    interface = input("Enter the Interface (ex. f1/1): ")
+    network_addresses = input("Enter the IPv4 address: ")
+    subnet = input("Enter the Subnet mask: ")
+    set_ipv4_command = f"enable\n{password}\nconf t\n"
+    
+    set_ipv4_command += f"interface {interface}\n"
+    set_ipv4_command += f"no shutdown\n"
+    set_ipv4_command += f"no switchport\n"
+    set_ipv4_command += f"ip address {network_addresses} {subnet}\n"
+    
+    result = filtered_nr.run(task=send_command, command=set_ipv4_command)
+    print_result(result)
+    filtered_nr.close_connections()
+
 def set_vlan(filtered_nr, password):
     print("********************\n")
     print("1 - Set VLAN\n")
     print("2 - Set Trunk\n")
     print("3 - Set Native VLAN\n")
-    print("4 - Set Inter VLAN Routing\n")
+    print("4 - Set IPv4 Address in VLAN\n")
     print("5 - Back\n")
     print("********************")
     action = input("Choose action: ")
@@ -64,7 +80,7 @@ def set_vlan(filtered_nr, password):
     
     elif action == "4":
         vlan_num = input("Enter the VLAN Number: ")
-        network_addresses = input("Enter the IP address: ")
+        network_addresses = input("Enter the IPv4 address: ")
         subnet = input("Enter the Subnet mask: ")
         
         set_vlan_command += f"interface vlan {vlan_num}\n"
@@ -85,7 +101,7 @@ def set_ether_channel(filtered_nr, password):
     
     set_ether_channel_command = f"enable\n{password}\nconf t\n"
     
-    set_ether_channel_command += f"int range {interface}\n"
+    set_ether_channel_command += f"interface range {interface}\n"
     set_ether_channel_command += f"channel-group {channel_group_number} mode active\n"
     set_ether_channel_command += f"ex\n"
     set_ether_channel_command += f"interface port-channle {channel_group_number}\n"
@@ -294,12 +310,12 @@ def set_nat_pat(filtered_nr, password):
         set_nat_pat_command += f"ip nat inside source list {ip_access_list_name} pool {ip_nat_pool_name} overload\n"
     
     elif action == "4":
-        interface = input("Enter the Out side interface (ex. f1/1): ")
+        interface = input("Enter the NAT Out-side Interface (ex. f1/1): ")
         set_nat_pat_command += f"int {interface}\n"
         set_nat_pat_command += f"ip nat outside\n"
     
     elif action == "5":
-        interface = input("Enter the In side interface (ex. f1/1): ")
+        interface = input("Enter the NAT In-side Interface (ex. f1/1): ")
         set_nat_pat_command += f"int {interface}\n"
         set_nat_pat_command += f"ip nat inside\n"
     
@@ -319,13 +335,14 @@ def main():
     while True:
         print("********************\n")
         print("1 - Show Data\n")
-        print("2 - Set VLAN\n")
-        print("3 - Set Ether Channel\n")
-        print("4 - Set Static  Routing\n")
-        print("5 - Set Dynamic Routing\n")
-        print("6 - Set DHCP\n")
-        print("7 - Set NAT/PAT\n")
-        print("8 - Exit\n")
+        print("2 - Set IPv4 Address\n")
+        print("3 - Set VLAN\n")
+        print("4 - Set Ether Channel\n")
+        print("5 - Set Static  Routing\n")
+        print("6 - Set Dynamic Routing\n")
+        print("7 - Set DHCP\n")
+        print("8 - Set NAT/PAT\n")
+        print("9 - Exit\n")
         print("********************")        
         user_action = input("Choose action : ")
         
@@ -333,24 +350,27 @@ def main():
             show_data(filtered_nr, password)
         
         elif user_action == "2":
-            set_vlan(filtered_nr, password)
+            set_ipv4(filtered_nr, password)
         
         elif user_action == "3":
-            set_ether_channel(filtered_nr, password)
+            set_vlan(filtered_nr, password)
         
         elif user_action == "4":
-            set_static_routing(filtered_nr, password)
+            set_ether_channel(filtered_nr, password)
         
         elif user_action == "5":
-            set_dynamic_routing(filtered_nr, password)
+            set_static_routing(filtered_nr, password)
         
         elif user_action == "6":
-            set_dhcp(filtered_nr, password)
+            set_dynamic_routing(filtered_nr, password)
         
         elif user_action == "7":
-            set_nat_pat(filtered_nr, password)
+            set_dhcp(filtered_nr, password)
         
         elif user_action == "8":
+            set_nat_pat(filtered_nr, password)
+        
+        elif user_action == "9":
             print("Exiting program...")
             break
         
