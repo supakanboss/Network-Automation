@@ -27,7 +27,7 @@ def show_data(filtered_nr, password):
 def set_ipv4(filtered_nr, password):
         
     interface = input("Enter the Interface (ex. f1/1): ")
-    network_addresses = input("Enter the IPv4 address: ")
+    network_address = input("Enter the IPv4 address: ")
     subnet = input("Enter the Subnet mask: ")
     set_ipv4_command = f"enable\n{password}\nconf t\n"
     
@@ -35,7 +35,7 @@ def set_ipv4(filtered_nr, password):
     set_ipv4_command += f"interface {interface}\n"
     set_ipv4_command += f"no shutdown\n"
     set_ipv4_command += f"no switchport\n"
-    set_ipv4_command += f"ip address {network_addresses} {subnet}\n"
+    set_ipv4_command += f"ip address {network_address} {subnet}\n"
     
     result = filtered_nr.run(task=send_command, command=set_ipv4_command)
     print_result(result)
@@ -81,11 +81,11 @@ def set_vlan(filtered_nr, password):
     
     elif action == "4":
         vlan_num = input("Enter the VLAN Number: ")
-        network_addresses = input("Enter the IPv4 address: ")
+        network_address = input("Enter the IPv4 address: ")
         subnet = input("Enter the Subnet mask: ")
         
         set_vlan_command += f"interface vlan {vlan_num}\n"
-        set_vlan_command += f"ip address {network_addresses} {subnet}\n"
+        set_vlan_command += f"ip address {network_address} {subnet}\n"
     
     elif action == "5":
         return
@@ -98,7 +98,7 @@ def set_ether_channel(filtered_nr, password):
     
     interface = input("Enter the Interface (ex. f1/1-12): ")
     channel_group_number = input("Enter the Channel group number: ")
-    vlan_num = input("Enter the VLAN Number: ")
+    vlan_number = input("Enter the VLAN Number: ")
     
     set_ether_channel_command = f"enable\n{password}\nconf t\n"
     
@@ -107,7 +107,7 @@ def set_ether_channel(filtered_nr, password):
     set_ether_channel_command += f"ex\n"
     set_ether_channel_command += f"interface port-channle {channel_group_number}\n"
     set_ether_channel_command += f"switch mode trunk\n"
-    set_ether_channel_command += f"switch trunk allowed vlan {vlan_num}\n"
+    set_ether_channel_command += f"switch trunk allowed vlan {vlan_number}\n"
     
     result = filtered_nr.run(task=send_command, command=set_ether_channel_command)
     print_result(result)
@@ -115,12 +115,12 @@ def set_ether_channel(filtered_nr, password):
 
 def set_static_routing(filtered_nr, password):
     
-    network_addresses = input("Enter the Network addresses: ")
+    network_address = input("Enter the Network address: ")
     subnet = input("Enter the Subnet mask: ")
     next_hop = input("Enter the Next hop: ")
     
     routing_command = f"enable\n{password}\nconf t\n"
-    routing_command += f"ip route {network_addresses} {subnet} {next_hop}\n"
+    routing_command += f"ip route {network_address} {subnet} {next_hop}\n"
     
     result = filtered_nr.run(task=send_command, command=routing_command)
     print_result(result)
@@ -151,13 +151,13 @@ def set_dynamic_routing(filtered_nr, password):
     elif action == "2":
         
         router_ospf_process = input("Enter the Router OSPF process number: ")
-        network_addresses = input("Enter the Network addresses (comma-separated): ").split(',')
+        network_address = input("Enter the Network address (comma-separated): ").split(',')
         wildcard_masks = input("Enter the Wildcard masks (comma-separated): ").split(',')
         ospf_area = input("Enter the OSPF area: ")
         
         routing_command += f"router ospf {router_ospf_process}\n"
         
-        for network_address, wildcard_mask in zip(network_addresses, wildcard_masks):
+        for network_address, wildcard_mask in zip(network_address, wildcard_masks):
             routing_command += f"network {network_address.strip()} {wildcard_mask.strip()} area {ospf_area}\n"
     
     elif action == "3":
@@ -171,12 +171,12 @@ def set_dynamic_routing(filtered_nr, password):
     
     elif action == "4":
         
-        network_addresses = input("Enter the Network addresses (comma-separated): ").split(',')
+        network_address = input("Enter the Network address (comma-separated): ").split(',')
         wildcard_masks = input("Enter the Wildcard masks (comma-separated): ").split(',')
         
         routing_command += "router eigrp 1\n"
         
-        for network_address, wildcard_mask in zip(network_addresses, wildcard_masks):
+        for network_address, wildcard_mask in zip(network_address, wildcard_masks):
             routing_command += f"network {network_address.strip()} {wildcard_mask.strip()}\n"
     
     elif action == "5":
@@ -270,22 +270,22 @@ def set_nat_pat(filtered_nr, password):
     
     if action == "1":
         
-        private_ip_addresses = input("Enter the Private ip addresses (comma-separated): ").split(',')
-        public_ip_addresses = input("Enter the Public ip addresses (comma-separated): ").split(',')
+        private_ip_address = input("Enter the Private ip address (comma-separated): ").split(',')
+        public_ip_address = input("Enter the Public ip address (comma-separated): ").split(',')
         
-        for private_ip_addresses, public_ip_addresses in zip(private_ip_addresses, public_ip_addresses):
-            set_nat_pat_command += f"ip nat inside source static {private_ip_addresses.strip()} {public_ip_addresses.strip()}\n"
+        for private_ip_address, public_ip_address in zip(private_ip_address, public_ip_address):
+            set_nat_pat_command += f"ip nat inside source static {private_ip_address.strip()} {public_ip_address.strip()}\n"
     
     elif action == "2":
         
         ip_access_list_name = input("Enter the IP access list Standard name: ")
-        network_addresses = input("Enter the Network addresses (comma-separated): ").split(',')
+        network_address = input("Enter the Network address (comma-separated): ").split(',')
         wildcard_masks = input("Enter the Wildcard masks (comma-separated): ").split(',')
         interface = input("Enter the Out side interface (ex. f1/1): ")
         
         set_nat_pat_command += f"ip access-list standard {ip_access_list_name}\n"
         
-        for network_address, wildcard_mask in zip(network_addresses, wildcard_masks):
+        for network_address, wildcard_mask in zip(network_address, wildcard_masks):
             set_nat_pat_command += f"permit {network_address.strip()} {wildcard_mask.strip()}\n"
         
         set_nat_pat_command += f"ex\n"
@@ -294,20 +294,20 @@ def set_nat_pat(filtered_nr, password):
     elif action == "3":
         
         ip_access_list_name = input("Enter the IP access list Standard name: ")
-        network_addresses = input("Enter the Network addresses (comma-separated): ").split(',')
+        network_address = input("Enter the Network address (comma-separated): ").split(',')
         wildcard_masks = input("Enter the Wildcard masks (comma-separated): ").split(',')
         ip_nat_pool_name = input("Enter the IP NAT pool name: ")
-        public_ip_addresses_start = input("Enter the Public ip addresses (Start): ")
-        public_ip_addresses_end = input("Enter the Public ip addresses (End): ")
-        netmask_public_ip = input("Enter the Netmask Public ip addresses : ")
+        public_ip_address_start = input("Enter the Public ip address (Start): ")
+        public_ip_address_end = input("Enter the Public ip address (End): ")
+        netmask_public_ip = input("Enter the Netmask Public ip address : ")
         
         set_nat_pat_command += f"ip access-list standard {ip_access_list_name}\n"
         
-        for network_address, wildcard_mask in zip(network_addresses, wildcard_masks):
+        for network_address, wildcard_mask in zip(network_address, wildcard_masks):
             set_nat_pat_command += f"permit {network_address.strip()} {wildcard_mask.strip()}\n"
         
         set_nat_pat_command += f"ex\n"
-        set_nat_pat_command += f"ip nat pool {ip_nat_pool_name} {public_ip_addresses_start} {public_ip_addresses_end} netmask {netmask_public_ip}\n"
+        set_nat_pat_command += f"ip nat pool {ip_nat_pool_name} {public_ip_address_start} {public_ip_address_end} netmask {netmask_public_ip}\n"
         set_nat_pat_command += f"ip nat inside source list {ip_access_list_name} pool {ip_nat_pool_name} overload\n"
     
     elif action == "4":
@@ -327,6 +327,97 @@ def set_nat_pat(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
+def ipv6(filtered_nr, password):
+    
+    print("********************\n")
+    print("1 - Set IPv6 Address in Interface\n")
+    print("2 - Set IPv6 Address in VLAN\n")
+    print("3 - Set IPv6 EUI-64\n")
+    print("4 - Set Tunnel IPv4/IPv6\n")
+    print("OSPFv3 Dynamic Routing")
+    print("5 - Set Router ID\n")
+    print("6 - Set OSPFv3\n")
+    print("7 - Clear IPv6 OSPF Process\n")
+    print("8 - Back\n")
+    print("********************")
+    action = input("Choose action : ")
+    ipv6_command = f"enable\n{password}\nconf t\n"
+    
+    if action == "1":
+        
+        interface = input("Enter the Interface (ex. f1/1): ")
+        address = input("Enter the IPv6 address: ")
+        prefix_lengths = input("Enter the Prefix Lengths: ")
+    
+        ipv6_command += f"ipv6 unicast-routing\n"
+        ipv6_command += f"interface {interface}\n"
+        ipv6_command += f"no shutdown\n"
+        ipv6_command += f"no switchport\n"
+        ipv6_command += f"ipv6 address {address}/{prefix_lengths}\n"
+
+    elif action == "2":
+        
+        vlan_number = input("Enter the VLAN Nmuber: ")
+        address = input("Enter the IPv6 address: ")
+        prefix_lengths = input("Enter the Prefix Lengths: ")
+    
+        ipv6_command += f"ipv6 unicast-routing\n"
+        ipv6_command += f"interface vlan {vlan_number}\n"
+        ipv6_command += f"ipv6 address {address}/{prefix_lengths}\n"
+    
+    elif action == "3":
+        
+        interface = input("Enter the Interface (ex. f1/1 or vlan 10): ")
+        address = input("Enter the IPv6 address: ")
+        prefix_lengths = input("Enter the Prefix Lengths: ")
+    
+        ipv6_command += f"ipv6 unicast-routing\n"
+        ipv6_command += f"interface {interface}\n"
+        ipv6_command += f"ipv6 address {address}/{prefix_lengths} eui-64\n"
+
+    elif action == "4":
+        
+        tunnel_number = input("Enter the Interface Tunnel Number: ")
+        address = input("Enter the IPv6 address: ")
+        prefix_lengths = input("Enter the Prefix Lengths: ")
+        tunnel_source = input("Enter the Tunnel Source (ex. g0/0/0): ")
+        tunnel_destination = input("Enter the Tunnel Destination (IPv4 Address): ")
+        
+        ipv6_command += f"interface tunnel {tunnel_number}\n"
+        ipv6_command += f"ipv6 address {address}/{prefix_lengths}\n"
+        ipv6_command += f"tunnel source {tunnel_source}\n"
+        ipv6_command += f"tunnel destination {tunnel_destination}\n"
+        ipv6_command += f"tunnel tunnel mode ipv6ip\n"
+    
+    elif action == "5":
+        
+        ospfv3_process_number = input("Enter the Router OSPFv3 process number: ")
+        router_id = input("Enter the Router ID (ex. 1.1.1.1): ")
+        
+        ipv6_command += f"ipv6 router ospf {ospfv3_process_number}\n"
+        ipv6_command += f"router-id {router_id}\n"
+    
+    elif action == "6":
+        
+        interface = input("Enter the Interface (ex. f1/1-10,f1/14): ")
+        ospfv3_process_number = input("Enter the Router OSPFv3 process number: ")
+        ospfv3_area = input("Enter the OSPFv3 area: ")
+        
+        ipv6_command += f"interface {interface}\n"
+        ipv6_command += f"ipv6 ospf {ospfv3_process_number} area {ospfv3_area}\n"
+        
+    elif action == "7":
+        
+        ipv6_command += f"do clear ipv6 ospf process\n"
+        ipv6_command += f"yes\n"
+        
+    elif action == "8":
+        return
+        
+    result = filtered_nr.run(task=send_command, command=ipv6_command)
+    print_result(result)
+    filtered_nr.close_connections()
+
 def main():
     nr = InitNornir(config_file="config.yaml")
     
@@ -343,7 +434,8 @@ def main():
         print("6 - Set Dynamic Routing\n")
         print("7 - Set DHCP\n")
         print("8 - Set NAT/PAT\n")
-        print("9 - Exit\n")
+        print("9 - IPv6\n")
+        print("10 - Exit\n")
         print("********************")        
         user_action = input("Choose action : ")
         
@@ -372,6 +464,9 @@ def main():
             set_nat_pat(filtered_nr, password)
         
         elif user_action == "9":
+            ipv6(filtered_nr, password)
+        
+        elif user_action == "10":
             print("Exiting program...")
             break
         
