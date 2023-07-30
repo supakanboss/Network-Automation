@@ -5,13 +5,14 @@ from nornir.core.filter import F
 from getpass import getpass
 
 def send_command(task, command):
+    
     result = task.run(task=netmiko_send_command, command_string=command, use_timing=True)
     return {
         "output": result,
     }
 
-def filter_group(nr):
-    group_name = input("Enter the device group name: ")
+def filter_group(nr,group_name):
+    
     filtered_nr = nr.filter(F(groups__contains=group_name))
     print(f"Number of hosts after filtering: {len(filtered_nr.inventory.hosts)}")
     return filtered_nr
@@ -41,8 +42,9 @@ def set_ipv4(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
-def set_vlan(filtered_nr, password):
-    print("********************\n")
+def set_vlan(filtered_nr, password, group_name):
+    
+    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set VLAN")
     print("2 - Set Trunk")
     print("3 - Set Native VLAN")
@@ -126,9 +128,9 @@ def set_static_routing(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
-def set_dynamic_routing(filtered_nr, password):
-
-    print("********************\n")
+def set_dynamic_routing(filtered_nr, password, group_name):
+    
+    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set Router ID")
     print("2 - Set OSPF")
     print("3 - Set Virtual Link")
@@ -201,8 +203,9 @@ def set_dynamic_routing(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
-def set_dhcp(filtered_nr, password):
-    print("********************\n")
+def set_dhcp(filtered_nr, password, group_name):
+    
+    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set DHCP Pool")
     print("2 - Set Excluded IP Address")
     print("3 - Optional Default Router")
@@ -255,9 +258,9 @@ def set_dhcp(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
-def set_nat_pat(filtered_nr, password):
+def set_nat_pat(filtered_nr, password, group_name):
     
-    print("********************\n")
+    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set NAT Static")
     print("2 - Set PAT 1 Public ip address")
     print("3 - Set PAT more than 1 Public ip address")
@@ -327,9 +330,9 @@ def set_nat_pat(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
-def ipv6(filtered_nr, password):
+def ipv6(filtered_nr, password, group_name):
     
-    print("********************\n")
+    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set IPv6 Address in Interface")
     print("2 - Set IPv6 Address in VLAN")
     print("3 - Set IPv6 EUI-64")
@@ -419,13 +422,17 @@ def ipv6(filtered_nr, password):
     filtered_nr.close_connections()
 
 def main():
+    
     nr = InitNornir(config_file="config.yaml")
     
-    filtered_nr = filter_group(nr)
+    group_name = input("Enter the device group name: ")
+    filtered_nr = filter_group(nr,group_name)
+    
     password = getpass("Enter Privileged Mode Password :")
     
     while True:
-        print("********************\n")
+        
+        print("******************** "+"---- Device Group : "+ group_name +" -----\n")
         print("1 - Show Data")
         print("2 - Set IPv4 Address")
         print("3 - Set VLAN")
@@ -435,8 +442,10 @@ def main():
         print("7 - Set DHCP")
         print("8 - Set NAT/PAT")
         print("9 - IPv6")
-        print("10 - Exit\n")
-        print("********************")        
+        print("10 - Change Device Group")
+        print("11 - Exit\n")
+        print("********************")  
+        
         user_action = input("Choose action : ")
         
         if user_action == "1":
@@ -446,7 +455,7 @@ def main():
             set_ipv4(filtered_nr, password)
         
         elif user_action == "3":
-            set_vlan(filtered_nr, password)
+            set_vlan(filtered_nr, password, group_name)
         
         elif user_action == "4":
             set_ether_channel(filtered_nr, password)
@@ -455,18 +464,23 @@ def main():
             set_static_routing(filtered_nr, password)
         
         elif user_action == "6":
-            set_dynamic_routing(filtered_nr, password)
+            set_dynamic_routing(filtered_nr, password, group_name)
         
         elif user_action == "7":
-            set_dhcp(filtered_nr, password)
+            set_dhcp(filtered_nr, password, group_name)
         
         elif user_action == "8":
-            set_nat_pat(filtered_nr, password)
+            set_nat_pat(filtered_nr, password, group_name)
         
         elif user_action == "9":
-            ipv6(filtered_nr, password)
+            ipv6(filtered_nr, password, group_name)
         
         elif user_action == "10":
+            group_name = input("Enter the device group name: ")
+            filtered_nr = filter_group(nr, group_name)
+            password = getpass("Enter Privileged Mode Password :")
+        
+        elif user_action == "11":
             print("Exiting program...")
             break
         
