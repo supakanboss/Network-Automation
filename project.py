@@ -43,10 +43,10 @@ def set_ipv4(filtered_nr, password):
 
 def set_vlan(filtered_nr, password):
     print("********************\n")
-    print("1 - Set VLAN\n")
-    print("2 - Set Trunk\n")
-    print("3 - Set Native VLAN\n")
-    print("4 - Set IPv4 Address in VLAN\n")
+    print("1 - Set VLAN")
+    print("2 - Set Trunk")
+    print("3 - Set Native VLAN")
+    print("4 - Set IPv4 Address in VLAN")
     print("5 - Back\n")
     print("********************")
     action = input("Choose action: ")
@@ -129,12 +129,12 @@ def set_static_routing(filtered_nr, password):
 def set_dynamic_routing(filtered_nr, password):
 
     print("********************\n")
-    print("1 - Set Router ID\n")
-    print("2 - Set OSPF\n")
-    print("3 - Set Virtual Link\n")
-    print("4 - Set EIGRP\n")
-    print("5 - Set Redistribute\n")
-    print("6 - Clear OSPF process\n")
+    print("1 - Set Router ID")
+    print("2 - Set OSPF")
+    print("3 - Set Virtual Link")
+    print("4 - Set EIGRP")
+    print("5 - Set Redistribute")
+    print("6 - Clear OSPF process")
     print("7 - Back\n")
     print("********************")
     action = input("Choose action : ")
@@ -203,11 +203,11 @@ def set_dynamic_routing(filtered_nr, password):
 
 def set_dhcp(filtered_nr, password):
     print("********************\n")
-    print("1 - Set DHCP Pool\n")
-    print("2 - Set Excluded IP Address\n")
-    print("3 - Optional Default Router\n")
-    print("4 - Optional DNS Server\n")
-    print("5 - Optional Set the lease duration for clients in minutes\n")
+    print("1 - Set DHCP Pool")
+    print("2 - Set Excluded IP Address")
+    print("3 - Optional Default Router")
+    print("4 - Optional DNS Server")
+    print("5 - Optional Set the lease duration for clients in minutes")
     print("6 - Back\n")
     print("********************")
     action = input("Choose action : ")
@@ -229,21 +229,21 @@ def set_dhcp(filtered_nr, password):
     
     if action == "3":
         dhcp_pool_name = input("Enter the DHCP Pool Name: ")
-        default_router_ip_address = ("Enter the Default Gateway IP Address: ")
+        default_router_ip_address = input("Enter the Default Gateway IP Address: ")
         
         dhcp_command += f"ip dhcp pool {dhcp_pool_name}\n"
         dhcp_command += f"default-router {default_router_ip_address}\n"
     
     if action == "4":
         dhcp_pool_name = input("Enter the DHCP Pool Name: ")
-        dns_server_ip_address = ("Enter the DNS Server IP Address: ")
+        dns_server_ip_address = input("Enter the DNS Server IP Address: ")
         
         dhcp_command += f"ip dhcp pool {dhcp_pool_name}\n"
         dhcp_command += f"dns-server {dns_server_ip_address}\n"
     
     if action == "5":
         dhcp_pool_name = input("Enter the DHCP Pool Name: ")
-        lease_duration_minutes = ("Enter the Lease Duration Minutes: ")
+        lease_duration_minutes = input("Enter the Lease Duration Minutes: ")
         
         dhcp_command += f"ip dhcp pool {dhcp_pool_name}\n"
         dhcp_command += f"lease {lease_duration_minutes}\n"
@@ -258,11 +258,11 @@ def set_dhcp(filtered_nr, password):
 def set_nat_pat(filtered_nr, password):
     
     print("********************\n")
-    print("1 - Set NAT Static\n")
-    print("2 - Set PAT 1 Public ip address\n")
-    print("3 - Set PAT more than 1 Public ip address\n")
-    print("4 - Set Out side\n")
-    print("5 - Set In side\n")
+    print("1 - Set NAT Static")
+    print("2 - Set PAT 1 Public ip address")
+    print("3 - Set PAT more than 1 Public ip address")
+    print("4 - Set Out side")
+    print("5 - Set In side")
     print("6 - Back\n")
     print("********************")
     action = input("Choose action : ")
@@ -330,14 +330,14 @@ def set_nat_pat(filtered_nr, password):
 def ipv6(filtered_nr, password):
     
     print("********************\n")
-    print("1 - Set IPv6 Address in Interface\n")
-    print("2 - Set IPv6 Address in VLAN\n")
-    print("3 - Set IPv6 EUI-64\n")
+    print("1 - Set IPv6 Address in Interface")
+    print("2 - Set IPv6 Address in VLAN")
+    print("3 - Set IPv6 EUI-64")
     print("4 - Set Tunnel IPv4/IPv6\n")
-    print("OSPFv3 Dynamic Routing")
-    print("5 - Set Router ID\n")
-    print("6 - Set OSPFv3\n")
-    print("7 - Clear IPv6 OSPF Process\n")
+    print("OSPFv3 Dynamic Routing\n")
+    print("5 - Set Router ID")
+    print("6 - Set OSPFv3")
+    print("7 - Clear IPv6 OSPF Process")
     print("8 - Back\n")
     print("********************")
     action = input("Choose action : ")
@@ -399,8 +399,8 @@ def ipv6(filtered_nr, password):
     
     elif action == "6":
         
-        interface = input("Enter the Interface (ex. f1/1-10,f1/14): ")
         ospfv3_process_number = input("Enter the Router OSPFv3 process number: ")
+        interface = input("Enter the Interface (ex. f1/1-10,f1/14): ")
         ospfv3_area = input("Enter the OSPFv3 area: ")
         
         ipv6_command += f"interface {interface}\n"
@@ -426,15 +426,15 @@ def main():
     
     while True:
         print("********************\n")
-        print("1 - Show Data\n")
-        print("2 - Set IPv4 Address\n")
-        print("3 - Set VLAN\n")
-        print("4 - Set Ether Channel\n")
-        print("5 - Set Static  Routing\n")
-        print("6 - Set Dynamic Routing\n")
-        print("7 - Set DHCP\n")
-        print("8 - Set NAT/PAT\n")
-        print("9 - IPv6\n")
+        print("1 - Show Data")
+        print("2 - Set IPv4 Address")
+        print("3 - Set VLAN")
+        print("4 - Set Ether Channel")
+        print("5 - Set Static  Routing")
+        print("6 - Set Dynamic Routing")
+        print("7 - Set DHCP")
+        print("8 - Set NAT/PAT")
+        print("9 - IPv6")
         print("10 - Exit\n")
         print("********************")        
         user_action = input("Choose action : ")
