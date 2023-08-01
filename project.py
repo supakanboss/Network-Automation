@@ -1,3 +1,4 @@
+from netmiko import ConnectHandler
 from nornir import InitNornir
 from nornir_utils.plugins.functions import print_result
 from nornir_netmiko import netmiko_send_command
@@ -315,12 +316,12 @@ def set_nat_pat(filtered_nr, password, group_name):
     
     elif action == "4":
         interface = input("Enter the NAT Out-side Interface (ex. f1/1): ")
-        set_nat_pat_command += f"int {interface}\n"
+        set_nat_pat_command += f"interface {interface}\n"
         set_nat_pat_command += f"ip nat outside\n"
     
     elif action == "5":
         interface = input("Enter the NAT In-side Interface (ex. f1/1): ")
-        set_nat_pat_command += f"int {interface}\n"
+        set_nat_pat_command += f"interface {interface}\n"
         set_nat_pat_command += f"ip nat inside\n"
     
     elif action == "6":
@@ -421,6 +422,57 @@ def ipv6(filtered_nr, password, group_name):
     print_result(result)
     filtered_nr.close_connections()
 
+def backup_config(filtered_nr, password):
+    print("Starting config backup...")
+    command = "show running-config"
+
+    for host in filtered_nr.inventory.hosts.values():
+        netmiko_params = host.get_connection_parameters("netmiko")
+        netmiko_params = netmiko_params.dict()  
+
+        netmiko_params.pop("extras", None)  
+        netmiko_params["host"] = netmiko_params.pop("hostname", None)  
+        netmiko_params.pop("platform", None)  
+        netmiko_params["secret"] = password
+        netmiko_params["device_type"] = host.platform
+
+        try:
+            with ConnectHandler(**netmiko_params) as conn:
+                conn.enable()  
+                output = conn.send_command(command)
+                with open(f"backup/{host}.conf", "w") as file:
+                    file.write(output)
+                    print(f"Config for {host} saved!")
+        except Exception as e:
+            print(f"An error occurred while backing up {host}: {e}")
+
+    print("Config backup complete.")
+
+def restore_config(filtered_nr, password):
+    print("Starting config restore...")
+
+    for host in filtered_nr.inventory.hosts.values():
+        config_file = f"backup/{host}.conf"  
+        netmiko_params = host.get_connection_parameters("netmiko")
+        netmiko_params = netmiko_params.dict()  
+
+        
+        netmiko_params.pop("extras", None)  
+        netmiko_params["host"] = netmiko_params.pop("hostname", None)  
+        netmiko_params.pop("platform", None)  
+        netmiko_params["secret"] = password
+        netmiko_params["device_type"] = host.platform
+
+        try:
+            with ConnectHandler(**netmiko_params) as conn:
+                conn.enable()  
+                output = conn.send_config_from_file(config_file)
+                print(f"Config for {host} restored!")
+        except Exception as e:
+            print(f"An error occurred while restoring config for {host}: {e}")
+
+    print("Config restore complete.")
+
 def main():
     
     nr = InitNornir(config_file="config.yaml")
@@ -443,7 +495,9 @@ def main():
         print("8 - Set NAT/PAT")
         print("9 - IPv6")
         print("10 - Change Device Group")
-        print("11 - Exit\n")
+        print("11 - Backup Config")
+        print("12 - Restore Config")
+        print("13 - Exit\n")
         print("********************")  
         
         user_action = input("Choose action : ")
@@ -481,6 +535,12 @@ def main():
             password = getpass("Enter Privileged Mode Password :")
         
         elif user_action == "11":
+            backup_config(filtered_nr, password)
+        
+        elif user_action == "12":
+            restore_config(filtered_nr, password)
+        
+        elif user_action == "13":
             print("Exiting program...")
             break
         
