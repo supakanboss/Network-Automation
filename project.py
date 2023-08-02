@@ -1,49 +1,69 @@
 from netmiko import ConnectHandler
 from nornir import InitNornir
 from nornir_utils.plugins.functions import print_result
-from nornir_netmiko import netmiko_send_command
 from nornir.core.filter import F
 from getpass import getpass
+from netmiko import ConnectHandler
 
 def send_command(task, command):
     
-    result = task.run(task=netmiko_send_command, command_string=command, use_timing=True)
+    device_name = task.host.name
+    password = passwords[device_name]  
+    device_type = task.host.get('device_type', 'cisco_ios_telnet')  
+    
+    net_connect = ConnectHandler(device_type=device_type, ip=task.host.hostname, username=task.host.username, password=password)
+    
+    result = net_connect.send_command_timing("enable")  
+    if "Password:" in result:  
+        result += net_connect.send_command_timing(password)  
+    
+    result += net_connect.send_command_timing(command)  
+    net_connect.disconnect()
+
     return {
         "output": result,
     }
 
-def filter_group(nr,group_name):
+def filter_group(nr, group_name):
     
     filtered_nr = nr.filter(F(groups__contains=group_name))
-    print(f"Number of hosts after filtering: {len(filtered_nr.inventory.hosts)}")
-    return filtered_nr
-
-def show_data(filtered_nr, password):
+    hosts = filtered_nr.inventory.hosts
+    num_hosts = len(hosts)
     
-    show_interfaces_command = f"enable\n{password}\nshow interface"
+    if num_hosts > 0:
+        print(f"Number of hosts after filtering: {num_hosts}")
+        print("Devices in group '{}':".format(group_name))
+        return filtered_nr, hosts
+    else:
+        print("No devices found in group '{}'.".format(group_name))
+        return None, None
+
+def show_data(filtered_nr):
+    
+    show_interfaces_command = "enable\nshow interface"
     
     result = filtered_nr.run(task=send_command, command=show_interfaces_command)
     print_result(result)
     filtered_nr.close_connections()
 
-def set_ipv4(filtered_nr, password):
+def set_ipv4(filtered_nr):
         
     interface = input("Enter the Interface (ex. f1/1): ")
     network_address = input("Enter the IPv4 address: ")
     subnet = input("Enter the Subnet mask: ")
-    set_ipv4_command = f"enable\n{password}\nconf t\n"
+    set_ipv4_command = "enable\nconf t\n"  
     
-    set_ipv4_command += f"ip routing\n"
+    set_ipv4_command += "ip routing\n"
     set_ipv4_command += f"interface {interface}\n"
-    set_ipv4_command += f"no shutdown\n"
-    set_ipv4_command += f"no switchport\n"
+    set_ipv4_command += "no shutdown\n"
+    set_ipv4_command += "no switchport\n"
     set_ipv4_command += f"ip address {network_address} {subnet}\n"
     
     result = filtered_nr.run(task=send_command, command=set_ipv4_command)
     print_result(result)
     filtered_nr.close_connections()
 
-def set_vlan(filtered_nr, password, group_name):
+def set_vlan(filtered_nr, group_name):
     
     print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set VLAN")
@@ -53,7 +73,7 @@ def set_vlan(filtered_nr, password, group_name):
     print("5 - Back\n")
     print("********************")
     action = input("Choose action: ")
-    set_vlan_command = f"enable\n{password}\nconf t\n"
+    set_vlan_command = "enable\nconf t\n"  
     
     if action == "1":
         vlan_num = input("Enter the VLAN Number: ")
@@ -97,13 +117,13 @@ def set_vlan(filtered_nr, password, group_name):
     print_result(result) 
     filtered_nr.close_connections()
 
-def set_ether_channel(filtered_nr, password):
+def set_ether_channel(filtered_nr):
     
     interface = input("Enter the Interface (ex. f1/1-12): ")
     channel_group_number = input("Enter the Channel group number: ")
     vlan_number = input("Enter the VLAN Number: ")
     
-    set_ether_channel_command = f"enable\n{password}\nconf t\n"
+    set_ether_channel_command = "enable\nconf t\n"
     
     set_ether_channel_command += f"interface range {interface}\n"
     set_ether_channel_command += f"channel-group {channel_group_number} mode active\n"
@@ -116,20 +136,20 @@ def set_ether_channel(filtered_nr, password):
     print_result(result)
     filtered_nr.close_connections()
 
-def set_static_routing(filtered_nr, password):
+def set_static_routing(filtered_nr):
     
     network_address = input("Enter the Network address: ")
     subnet = input("Enter the Subnet mask: ")
     next_hop = input("Enter the Next hop: ")
     
-    routing_command = f"enable\n{password}\nconf t\n"
+    routing_command = "enable\nconf t\n"
     routing_command += f"ip route {network_address} {subnet} {next_hop}\n"
     
     result = filtered_nr.run(task=send_command, command=routing_command)
     print_result(result)
     filtered_nr.close_connections()
 
-def set_dynamic_routing(filtered_nr, password, group_name):
+def set_dynamic_routing(filtered_nr, group_name):
     
     print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set Router ID")
@@ -141,7 +161,7 @@ def set_dynamic_routing(filtered_nr, password, group_name):
     print("7 - Back\n")
     print("********************")
     action = input("Choose action : ")
-    routing_command = f"enable\n{password}\nconf t\n"
+    routing_command = "enable\nconf t\n"
     
     if action == "1":
         
@@ -204,7 +224,7 @@ def set_dynamic_routing(filtered_nr, password, group_name):
     print_result(result)
     filtered_nr.close_connections()
 
-def set_dhcp(filtered_nr, password, group_name):
+def set_dhcp(filtered_nr, group_name):
     
     print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set DHCP Pool")
@@ -215,7 +235,7 @@ def set_dhcp(filtered_nr, password, group_name):
     print("6 - Back\n")
     print("********************")
     action = input("Choose action : ")
-    dhcp_command = f"enable\n{password}\nconf t\n"
+    dhcp_command = "enable\nconf t\n"
     
     if action == "1":
         dhcp_pool_name = input("Enter the DHCP Pool Name: ")
@@ -259,7 +279,7 @@ def set_dhcp(filtered_nr, password, group_name):
     print_result(result)
     filtered_nr.close_connections()
 
-def set_nat_pat(filtered_nr, password, group_name):
+def set_nat_pat(filtered_nr, group_name):
     
     print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set NAT Static")
@@ -270,7 +290,7 @@ def set_nat_pat(filtered_nr, password, group_name):
     print("6 - Back\n")
     print("********************")
     action = input("Choose action : ")
-    set_nat_pat_command = f"enable\n{password}\nconf t\n"
+    set_nat_pat_command = "enable\nconf t\n"
     
     if action == "1":
         
@@ -331,7 +351,7 @@ def set_nat_pat(filtered_nr, password, group_name):
     print_result(result)
     filtered_nr.close_connections()
 
-def ipv6(filtered_nr, password, group_name):
+def ipv6(filtered_nr, group_name):
     
     print("******************** "+"---- Device Group : "+ group_name +" -----\n")
     print("1 - Set IPv6 Address in Interface")
@@ -345,7 +365,7 @@ def ipv6(filtered_nr, password, group_name):
     print("8 - Back\n")
     print("********************")
     action = input("Choose action : ")
-    ipv6_command = f"enable\n{password}\nconf t\n"
+    ipv6_command = "enable\nconf t\n"
     
     if action == "1":
         
@@ -422,7 +442,8 @@ def ipv6(filtered_nr, password, group_name):
     print_result(result)
     filtered_nr.close_connections()
 
-def backup_config(filtered_nr, password):
+def backup_config(filtered_nr):
+    
     print("Starting config backup...")
     command = "show running-config"
 
@@ -433,8 +454,10 @@ def backup_config(filtered_nr, password):
         netmiko_params.pop("extras", None)  
         netmiko_params["host"] = netmiko_params.pop("hostname", None)  
         netmiko_params.pop("platform", None)  
-        netmiko_params["secret"] = password
         netmiko_params["device_type"] = host.platform
+
+        enable_password = getpass(f"Enter enable password for {host}: ")
+        netmiko_params["secret"] = enable_password
 
         try:
             with ConnectHandler(**netmiko_params) as conn:
@@ -448,7 +471,8 @@ def backup_config(filtered_nr, password):
 
     print("Config backup complete.")
 
-def restore_config(filtered_nr, password):
+def restore_config(filtered_nr):
+    
     print("Starting config restore...")
 
     for host in filtered_nr.inventory.hosts.values():
@@ -456,11 +480,12 @@ def restore_config(filtered_nr, password):
         netmiko_params = host.get_connection_parameters("netmiko")
         netmiko_params = netmiko_params.dict()  
 
-        
         netmiko_params.pop("extras", None)  
         netmiko_params["host"] = netmiko_params.pop("hostname", None)  
         netmiko_params.pop("platform", None)  
-        netmiko_params["secret"] = password
+
+        enable_password = getpass(f"Enter enable password for {host}: ")
+        netmiko_params["secret"] = enable_password
         netmiko_params["device_type"] = host.platform
 
         try:
@@ -475,12 +500,20 @@ def restore_config(filtered_nr, password):
 
 def main():
     
+    global passwords  # Declare 'passwords' as a global variable
     nr = InitNornir(config_file="config.yaml")
     
     group_name = input("Enter the device group name: ")
-    filtered_nr = filter_group(nr,group_name)
+    filtered_nr, hosts = filter_group(nr, group_name)
     
-    password = getpass("Enter Privileged Mode Password :")
+    if filtered_nr is None:
+        return  # Exit the program if no devices are found in the specified group
+    
+    passwords = {}  # Initialize the 'passwords' dictionary here
+    
+    for host in hosts:
+        password = getpass("Enter the password for device '{}': ".format(host))
+        passwords[host] = password
     
     while True:
         
@@ -503,42 +536,47 @@ def main():
         user_action = input("Choose action : ")
         
         if user_action == "1":
-            show_data(filtered_nr, password)
+            show_data(filtered_nr)
         
         elif user_action == "2":
-            set_ipv4(filtered_nr, password)
+            set_ipv4(filtered_nr)
         
         elif user_action == "3":
-            set_vlan(filtered_nr, password, group_name)
+            set_vlan(filtered_nr, group_name)
         
         elif user_action == "4":
-            set_ether_channel(filtered_nr, password)
+            set_ether_channel(filtered_nr)
         
         elif user_action == "5":
-            set_static_routing(filtered_nr, password)
+            set_static_routing(filtered_nr)
         
         elif user_action == "6":
-            set_dynamic_routing(filtered_nr, password, group_name)
+            set_dynamic_routing(filtered_nr, group_name)
         
         elif user_action == "7":
-            set_dhcp(filtered_nr, password, group_name)
+            set_dhcp(filtered_nr, group_name)
         
         elif user_action == "8":
-            set_nat_pat(filtered_nr, password, group_name)
+            set_nat_pat(filtered_nr, group_name)
         
         elif user_action == "9":
-            ipv6(filtered_nr, password, group_name)
+            ipv6(filtered_nr, group_name)
         
         elif user_action == "10":
             group_name = input("Enter the device group name: ")
-            filtered_nr = filter_group(nr, group_name)
-            password = getpass("Enter Privileged Mode Password :")
+            filtered_nr, hosts = filter_group(nr, group_name)
+
+            if filtered_nr is not None:
+                passwords = {}  # Clear the 'passwords' dictionary
+                for host in hosts:
+                    password = getpass("Enter the password for device '{}': ".format(host))
+                    passwords[host] = password
         
         elif user_action == "11":
-            backup_config(filtered_nr, password)
+            backup_config(filtered_nr)
         
         elif user_action == "12":
-            restore_config(filtered_nr, password)
+            restore_config(filtered_nr)
         
         elif user_action == "13":
             print("Exiting program...")
