@@ -20,9 +20,7 @@ def send_command(task, command):
     result += net_connect.send_command_timing(command)  
     net_connect.disconnect()
 
-    return {
-        "output": result,
-    }
+    return result
 
 def filter_group(nr, group_name):
     
