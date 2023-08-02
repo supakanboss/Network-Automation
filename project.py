@@ -500,16 +500,16 @@ def restore_config(filtered_nr):
 
 def main():
     
-    global passwords  # Declare 'passwords' as a global variable
+    global passwords  
     nr = InitNornir(config_file="config.yaml")
     
     group_name = input("Enter the device group name: ")
     filtered_nr, hosts = filter_group(nr, group_name)
     
     if filtered_nr is None:
-        return  # Exit the program if no devices are found in the specified group
+        return  
     
-    passwords = {}  # Initialize the 'passwords' dictionary here
+    passwords = {}  
     
     for host in hosts:
         password = getpass("Enter the password for device '{}': ".format(host))
@@ -567,7 +567,7 @@ def main():
             filtered_nr, hosts = filter_group(nr, group_name)
 
             if filtered_nr is not None:
-                passwords = {}  # Clear the 'passwords' dictionary
+                passwords = {}  
                 for host in hosts:
                     password = getpass("Enter the password for device '{}': ".format(host))
                     passwords[host] = password
