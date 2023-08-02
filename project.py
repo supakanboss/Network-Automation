@@ -3,22 +3,44 @@ from nornir import InitNornir
 from nornir_utils.plugins.functions import print_result
 from nornir.core.filter import F
 from getpass import getpass
-from netmiko import ConnectHandler
+import logging
+
+def test_connection(host):
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        s.connect((host, 23))  
+        s.close()
+        return True
+    except Exception as e:
+        print(f"\033[91mCannot connect to device '{host}': {e} \033[0m")
+        return False
 
 def send_command(task, command):
-    
     device_name = task.host.name
-    password = passwords[device_name]  
-    device_type = task.host.get('device_type', 'cisco_ios_telnet')  
+    password = passwords.get(device_name)
+    if password is None:  
+        if not test_connection(task.host.hostname):
+            logging.error(f"\033[91m Cannot connect to {device_name} \033[0m")  
+            return "Cannot connect to device"
+        password = getpass("Enter the password for device '{}': ".format(device_name))
+        passwords[device_name] = password
+
+    device_type = task.host.get('device_type', 'cisco_ios_telnet')
     
-    net_connect = ConnectHandler(device_type=device_type, ip=task.host.hostname, username=task.host.username, password=password)
-    
-    result = net_connect.send_command_timing("enable")  
-    if "Password:" in result:  
-        result += net_connect.send_command_timing(password)  
-    
-    result += net_connect.send_command_timing(command)  
-    net_connect.disconnect()
+    try:
+        net_connect = ConnectHandler(device_type=device_type, ip=task.host.hostname, username=task.host.username, password=password)
+        result = net_connect.send_command_timing("enable")  
+        if "Password:" in result:  
+            result += net_connect.send_command_timing(password)  
+        result += net_connect.send_command_timing(command)  
+    except Exception as e:
+        logging.error(f"\033[91m {str(e)} \033[0m")  
+        result = str(e)
+    finally:
+        if net_connect:
+            net_connect.disconnect()
 
     return result
 
@@ -63,7 +85,7 @@ def set_ipv4(filtered_nr):
 
 def set_vlan(filtered_nr, group_name):
     
-    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
+    print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
     print("1 - Set VLAN")
     print("2 - Set Trunk")
     print("3 - Set Native VLAN")
@@ -149,7 +171,7 @@ def set_static_routing(filtered_nr):
 
 def set_dynamic_routing(filtered_nr, group_name):
     
-    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
+    print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
     print("1 - Set Router ID")
     print("2 - Set OSPF")
     print("3 - Set Virtual Link")
@@ -224,7 +246,7 @@ def set_dynamic_routing(filtered_nr, group_name):
 
 def set_dhcp(filtered_nr, group_name):
     
-    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
+    print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
     print("1 - Set DHCP Pool")
     print("2 - Set Excluded IP Address")
     print("3 - Optional Default Router")
@@ -279,7 +301,7 @@ def set_dhcp(filtered_nr, group_name):
 
 def set_nat_pat(filtered_nr, group_name):
     
-    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
+    print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
     print("1 - Set NAT Static")
     print("2 - Set PAT 1 Public ip address")
     print("3 - Set PAT more than 1 Public ip address")
@@ -351,7 +373,7 @@ def set_nat_pat(filtered_nr, group_name):
 
 def ipv6(filtered_nr, group_name):
     
-    print("******************** "+"---- Device Group : "+ group_name +" -----\n")
+    print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
     print("1 - Set IPv6 Address in Interface")
     print("2 - Set IPv6 Address in VLAN")
     print("3 - Set IPv6 EUI-64")
@@ -454,6 +476,12 @@ def backup_config(filtered_nr):
         netmiko_params.pop("platform", None)  
         netmiko_params["device_type"] = host.platform
 
+        host_ip = host.hostname
+
+        if not test_connection(host_ip):  # check connectivity before asking for password
+            print("\033[91m" + f"Cannot connect to device '{host}', skipping...\n" + "\033[0m")
+            continue
+
         enable_password = getpass(f"Enter enable password for {host}: ")
         netmiko_params["secret"] = enable_password
 
@@ -463,11 +491,11 @@ def backup_config(filtered_nr):
                 output = conn.send_command(command)
                 with open(f"backup/{host}.conf", "w") as file:
                     file.write(output)
-                    print(f"Config for {host} saved!")
+                    print(f"\033[92mConfig for {host} saved!\033[0m")
         except Exception as e:
-            print(f"An error occurred while backing up {host}: {e}")
+            print(f"\033[91mAn error occurred while backing up {host}: {e}\033[0m")
 
-    print("Config backup complete.")
+    print("\033[92mConfig backup complete.\033[0m")
 
 def restore_config(filtered_nr):
     
@@ -481,41 +509,56 @@ def restore_config(filtered_nr):
         netmiko_params.pop("extras", None)  
         netmiko_params["host"] = netmiko_params.pop("hostname", None)  
         netmiko_params.pop("platform", None)  
+        netmiko_params["device_type"] = host.platform
+
+        host_ip = host.hostname
+
+        if not test_connection(host_ip):  # check connectivity before asking for password
+            print("\033[91m" + f"Cannot connect to device '{host}', skipping...\n" + "\033[0m")
+            continue
 
         enable_password = getpass(f"Enter enable password for {host}: ")
         netmiko_params["secret"] = enable_password
-        netmiko_params["device_type"] = host.platform
 
         try:
             with ConnectHandler(**netmiko_params) as conn:
                 conn.enable()  
                 output = conn.send_config_from_file(config_file)
-                print(f"Config for {host} restored!")
+                print(f"\033[92mConfig for {host} restored!\033[0m")
         except Exception as e:
-            print(f"An error occurred while restoring config for {host}: {e}")
+            print(f"\033[91mAn error occurred while restoring config for {host}: {e}\033[0m")
 
-    print("Config restore complete.")
+    print("\033[92mConfig restore complete.\033[92m")
 
 def main():
-    
-    global passwords  
+    global passwords
     nr = InitNornir(config_file="config.yaml")
-    
-    group_name = input("Enter the device group name: ")
-    filtered_nr, hosts = filter_group(nr, group_name)
-    
-    if filtered_nr is None:
-        return  
-    
-    passwords = {}  
-    
-    for host in hosts:
-        password = getpass("Enter the password for device '{}': ".format(host))
-        passwords[host] = password
-    
+
     while True:
-        
-        print("******************** "+"---- Device Group : "+ group_name +" -----\n")
+        group_name = input("Enter the device group name: ")
+        filtered_nr, hosts = filter_group(nr, group_name)
+
+        if filtered_nr is not None:
+            passwords = {}
+            connected_devices = []  
+            for host in hosts:
+                host_ip = nr.inventory.hosts[host].hostname
+                if test_connection(host_ip):  
+                    password = getpass("Enter the password for device '{}': ".format(host))
+                    passwords[host] = password
+                    connected_devices.append(host)  
+                else:
+                    print(f"\033[91mCannot connect to device '{host}', skipping...\033[0m\n")
+
+            if connected_devices:
+                break
+            else:
+                print("No devices in this group could be connected to. Please choose another group.\n")
+        else:
+            print("Invalid device group. Please enter a valid group name.")
+
+    while True:
+        print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
         print("1 - Show Data")
         print("2 - Set IPv4 Address")
         print("3 - Set VLAN")
@@ -529,53 +572,67 @@ def main():
         print("11 - Backup Config")
         print("12 - Restore Config")
         print("13 - Exit\n")
-        print("********************")  
-        
+        print("********************")
+
         user_action = input("Choose action : ")
-        
+
         if user_action == "1":
             show_data(filtered_nr)
-        
+            
         elif user_action == "2":
             set_ipv4(filtered_nr)
-        
+            
         elif user_action == "3":
             set_vlan(filtered_nr, group_name)
-        
+            
         elif user_action == "4":
             set_ether_channel(filtered_nr)
-        
+            
         elif user_action == "5":
             set_static_routing(filtered_nr)
-        
+            
         elif user_action == "6":
             set_dynamic_routing(filtered_nr, group_name)
-        
+            
         elif user_action == "7":
             set_dhcp(filtered_nr, group_name)
-        
+            
         elif user_action == "8":
-            set_nat_pat(filtered_nr, group_name)
-        
+            set_nat_pat(filtered_nr, group_name
+                        )
         elif user_action == "9":
             ipv6(filtered_nr, group_name)
-        
+            
         elif user_action == "10":
-            group_name = input("Enter the device group name: ")
-            filtered_nr, hosts = filter_group(nr, group_name)
+            while True:
+                group_name = input("Enter the device group name: ")
+                filtered_nr, hosts = filter_group(nr, group_name)
 
-            if filtered_nr is not None:
-                passwords = {}  
-                for host in hosts:
-                    password = getpass("Enter the password for device '{}': ".format(host))
-                    passwords[host] = password
-        
+                if filtered_nr is not None:
+                    passwords = {}
+                    connected_devices = [] 
+                    for host in hosts:
+                        host_ip = nr.inventory.hosts[host].hostname
+                        if test_connection(host_ip):  
+                            password = getpass("Enter the password for device '{}': ".format(host))
+                            passwords[host] = password
+                            connected_devices.append(host)  
+                        else:
+                            print(f"\033[91mCannot connect to device '{host}', skipping...\033[0m\n")
+
+                    if connected_devices:
+                        break
+                    else:
+                        print("No devices in this group could be connected to. Please choose another group.\n")
+                else:
+                    print("Invalid device group. Please enter a valid group name.")
+                    
         elif user_action == "11":
             backup_config(filtered_nr)
-        
+            
         elif user_action == "12":
             restore_config(filtered_nr)
-        
+            
         elif user_action == "13":
             print("Exiting program...")
             break
