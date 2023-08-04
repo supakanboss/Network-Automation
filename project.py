@@ -14,7 +14,7 @@ def test_connection(host):
         s.close()
         return True
     except Exception as e:
-        print(f"\033[91mCannot connect to device '{host}': {e} \033[0m")
+        print(f"\033[91mCannot connect to device {host} : {e} \033[0m")
         return False
 
 def send_command(task, command):
@@ -24,7 +24,7 @@ def send_command(task, command):
         if not test_connection(task.host.hostname):
             logging.error(f"\033[91m Cannot connect to {device_name} \033[0m")  
             return "Cannot connect to device"
-        password = getpass("Enter the password for device '{}': ".format(device_name))
+        password = getpass("Enter the password for device \033[92m{}\033[0m: ".format(device_name))
         passwords[device_name] = password
 
     device_type = task.host.get('device_type', 'cisco_ios_telnet')
@@ -52,10 +52,10 @@ def filter_group(nr, group_name):
     
     if num_hosts > 0:
         print(f"Number of hosts after filtering: {num_hosts}")
-        print("Devices in group '{}':".format(group_name))
+        print("Devices in group \033[33m{}\033[0m:".format(group_name))
         return filtered_nr, hosts
     else:
-        print("No devices found in group '{}'.".format(group_name))
+        print("No devices found in group \033[33m{}\033[0m.".format(group_name))
         return None, None
 
 def show_data(filtered_nr):
@@ -479,10 +479,10 @@ def backup_config(filtered_nr):
         host_ip = host.hostname
 
         if not test_connection(host_ip):  # check connectivity before asking for password
-            print("\033[91m" + f"Cannot connect to device '{host}', skipping...\n" + "\033[0m")
+            print("\033[91m" + f"Cannot connect to device {host} , skipping...\n" + "\033[0m")
             continue
 
-        enable_password = getpass(f"Enter enable password for {host}: ")
+        enable_password = getpass(f"Enter enable password for \033[33m{host}\033[0m: ")
         netmiko_params["secret"] = enable_password
 
         try:
@@ -514,10 +514,10 @@ def restore_config(filtered_nr):
         host_ip = host.hostname
 
         if not test_connection(host_ip):  # check connectivity before asking for password
-            print("\033[91m" + f"Cannot connect to device '{host}', skipping...\n" + "\033[0m")
+            print("\033[91m" + f"Cannot connect to device {host} , skipping...\n" + "\033[0m")
             continue
 
-        enable_password = getpass(f"Enter enable password for {host}: ")
+        enable_password = getpass(f"Enter enable password for \033[33m{host}\033[0m: ")
         netmiko_params["secret"] = enable_password
 
         try:
@@ -544,11 +544,11 @@ def main():
             for host in hosts:
                 host_ip = nr.inventory.hosts[host].hostname
                 if test_connection(host_ip):  
-                    password = getpass("Enter the password for device '{}': ".format(host))
+                    password = getpass("Enter the password for device \033[33m{}\033[0m: ".format(host))
                     passwords[host] = password
                     connected_devices.append(host)  
                 else:
-                    print(f"\033[91mCannot connect to device '{host}', skipping...\033[0m\n")
+                    print(f"\033[91mCannot connect to device {host} , skipping...\033[0m\n")
 
             if connected_devices:
                 break
@@ -610,15 +610,15 @@ def main():
 
                 if filtered_nr is not None:
                     passwords = {}
-                    connected_devices = [] 
+                    connected_devices = []  
                     for host in hosts:
                         host_ip = nr.inventory.hosts[host].hostname
                         if test_connection(host_ip):  
-                            password = getpass("Enter the password for device '{}': ".format(host))
+                            password = getpass("Enter the password for device \033[33m{}\033[0m: ".format(host))
                             passwords[host] = password
                             connected_devices.append(host)  
                         else:
-                            print(f"\033[91mCannot connect to device '{host}', skipping...\033[0m\n")
+                            print(f"\033[91mCannot connect to device {host} , skipping...\033[0m\n")
 
                     if connected_devices:
                         break
