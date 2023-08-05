@@ -58,11 +58,86 @@ def filter_group(nr, group_name):
         print("No devices found in group \033[33m{}\033[0m.".format(group_name))
         return None, None
 
-def show_data(filtered_nr):
+def show_data(filtered_nr, group_name):
     
-    show_interfaces_command = "enable\nshow interface"
+    print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
+    print("1 - Show data interface")
+    print("2 - Show running-configuration")
+    print("3 - Show Mac Address Table")
+    print("4 - Show VLAN")
+    print("5 - Show IP Interface")
+    print("6 - Show IP Route")
+    print("7 - Show IP OSPF Border routers")
+    print("8 - Show IP OSPF Neighbor")
+    print("9 - Show IP EIGRP Neighbors")
+    print("10 - Show IPv6 Interface ")
+    print("11 - Show IPv6 Route")
+    print("12 - Show IPv6 OSPF Neighbor")
+    print("13 - Show IP NAT Statistics")
+    print("14 - Show IP NAT Translations")
+    print("15 - Show Access list")
+    print("16 - Show Trunk Interface")
+    print("17 - Show Ether Channel")
+    print("18 - Back\n")
+    print("********************")
+    action = input("Choose action: ")
+    show_data_command = "enable\n"  
     
-    result = filtered_nr.run(task=send_command, command=show_interfaces_command)
+    if action == "1":
+        show_data_command += f"show interface"
+        
+    elif action == "2":
+        show_data_command += f"show running-configuration"
+        
+    elif action == "3":
+        show_data_command += f"show mac address-table"
+        
+    elif action == "4":
+        show_data_command += f"show vlan brief"
+        
+    elif action == "5":
+        show_data_command += f"show ip interface brief"
+        
+    elif action == "6":
+        show_data_command += f"show ip route"
+        
+    elif action == "7":
+        show_data_command += f"show ospf border-routers"
+        
+    elif action == "8":
+        show_data_command += f"show ospf neighbor"
+        
+    elif action == "9":
+        show_data_command += f"show eigrp neighbor"
+        
+    elif action == "10":
+        show_data_command += f"show ipv6 interface brief"
+        
+    elif action == "11":
+        show_data_command += f"show ipv6 route"
+        
+    elif action == "12":
+        show_data_command += f"show ipv6 ospf neighbor"
+        
+    elif action == "13":
+        show_data_command += f"show ip nat statistics"
+        
+    elif action == "14":
+        show_data_command += f"show nat translations"
+        
+    elif action == "15":
+        show_data_command += f"show access-list"
+        
+    elif action == "16":
+        show_data_command += f"show interface trunk"
+    
+    elif action == "17":
+        show_data_command += f"show etherchannel summary"
+        
+    elif action == "18":
+        return
+    
+    result = filtered_nr.run(task=send_command, command=show_data_command)
     print_result(result)
     filtered_nr.close_connections()
 
@@ -577,7 +652,7 @@ def main():
         user_action = input("Choose action : ")
 
         if user_action == "1":
-            show_data(filtered_nr)
+            show_data(filtered_nr, group_name)
             
         elif user_action == "2":
             set_ipv4(filtered_nr)
