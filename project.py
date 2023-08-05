@@ -62,7 +62,7 @@ def show_data(filtered_nr, group_name):
     
     print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
     print("1 - Show data interface")
-    print("2 - Show running-configuration")
+    print("2 - Show running configuration")
     print("3 - Show Mac Address Table")
     print("4 - Show VLAN")
     print("5 - Show IP Interface")
@@ -87,7 +87,7 @@ def show_data(filtered_nr, group_name):
         show_data_command += f"show interface"
         
     elif action == "2":
-        show_data_command += f"show running-configuration"
+        show_data_command += f"show running-config"
         
     elif action == "3":
         show_data_command += f"show mac address-table"
