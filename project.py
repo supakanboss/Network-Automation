@@ -567,7 +567,7 @@ def backup_config(filtered_nr):
             with ConnectHandler(**netmiko_params) as conn:
                 conn.enable()  
                 output = conn.send_command(command)
-                with open(f"backup/{file_name}.conf", "w") as file:
+                with open(f"backup/{file_name}-{host}.conf", "w") as file:
                     file.write(output)
                     print(f"\033[92mConfig for {host} saved to {file_name}.conf!\033[0m")
         except Exception as e:
