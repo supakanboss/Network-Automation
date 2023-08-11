@@ -1,11 +1,11 @@
-from netmiko import ConnectHandler
-from nornir import InitNornir
-from nornir_utils.plugins.functions import print_result
-from nornir.core.filter import F
-from getpass import getpass
-import logging
 import os
+import logging
 import traceback
+from getpass import getpass
+from nornir import InitNornir
+from nornir.core.filter import F
+from netmiko import ConnectHandler
+from nornir_utils.plugins.functions import print_result
 
 def test_connection(host):
     import socket
@@ -52,7 +52,7 @@ def send_command(task, command):
         # If password is not found for the device in the file, then log an error.
         logging.error(f"\033[91m Password not found for {device_name} \033[0m")
         return "Password not found for device"
-      
+    
     if not test_connection(task.host.hostname):
         logging.error(f"\033[91m Cannot connect to {device_name} \033[0m")  
         return "Cannot connect to device"
