@@ -5,6 +5,7 @@ from nornir.core.filter import F
 from getpass import getpass
 import logging
 import os
+import traceback
 
 def test_connection(host):
     import socket
@@ -18,27 +19,54 @@ def test_connection(host):
         print(f"\033[91mCannot connect to device {host} : {e} \033[0m")
         return False
 
+def read_passwords_from_file(filename):
+    passwords = {}
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            line = line.strip()
+            if line: 
+                device_name, password = line.split(',')
+                passwords[device_name] = password
+    return passwords
+
+def custom_exception_handler(e, device_name):
+    frames = traceback.extract_tb(e.__traceback__)
+    frame = frames[-1]  
+    filename = frame.filename.split("\\")[-1]  
+    lineno = frame.lineno
+    line = frame.line.strip()
+    message = f"ERROR on device '{device_name}': {filename}:{lineno} - {line} => {e}"
+    logging.error(f"\033[91m {message} \033[0m")
+    return message
+
 def send_command(task, command):
     device_name = task.host.name
+
+    passwords = read_passwords_from_file("passwords.txt")
     password = passwords.get(device_name)
-    if password is None:  
-        if not test_connection(task.host.hostname):
-            logging.error(f"\033[91m Cannot connect to {device_name} \033[0m")  
-            return "Cannot connect to device"
-        password = getpass("Enter the password for device \033[92m{}\033[0m: ".format(device_name))
-        passwords[device_name] = password
+
+    net_connect = None
+
+    if password is None:
+        # If password is not found for the device in the file, then log an error.
+        logging.error(f"\033[91m Password not found for {device_name} \033[0m")
+        return "Password not found for device"
+      
+    if not test_connection(task.host.hostname):
+        logging.error(f"\033[91m Cannot connect to {device_name} \033[0m")  
+        return "Cannot connect to device"
 
     device_type = task.host.get('device_type', 'cisco_ios_telnet')
     
     try:
         net_connect = ConnectHandler(device_type=device_type, ip=task.host.hostname, username=task.host.username, password=password)
-        result = net_connect.send_command_timing("enable")  
+        result = net_connect.send_command_timing("enable")
         if "Password:" in result:  
-            result += net_connect.send_command_timing(password)  
-        result += net_connect.send_command_timing(command)  
+            result += net_connect.send_command_timing(password)
+        result += net_connect.send_command_timing(command)
     except Exception as e:
-        logging.error(f"\033[91m {str(e)} \033[0m")  
-        result = str(e)
+        result = custom_exception_handler(e, device_name)
     finally:
         if net_connect:
             net_connect.disconnect()
@@ -561,7 +589,7 @@ def backup_config(filtered_nr):
         enable_password = getpass(f"Enter enable password for \033[33m{host}\033[0m: ")
         netmiko_params["secret"] = enable_password
 
-        file_name = input(f"Enter the filename to save the backup for {host} (without extension): ")
+        file_name = input(f"Enter the filename to save the backup for \033[33m{host}\033[0m (without extension): ")
 
         try:
             with ConnectHandler(**netmiko_params) as conn:
@@ -594,7 +622,7 @@ def restore_config(filtered_nr):
             print("\033[91m" + f"Cannot connect to device {host} , skipping...\n" + "\033[0m")
             continue
 
-        file_name = input(f"Enter the filename to restore the config for {host} (without extension): ")
+        file_name = input(f"Enter the filename to save the backup for \033[33m{host}\033[0m (without extension): ")
         config_file = f"backup/{file_name}.conf"
         
         # Check if the file exists before trying to restore
@@ -616,24 +644,28 @@ def restore_config(filtered_nr):
     print("\033[92mConfig restore complete.\033[0m")
 
 def main():
+
     global passwords
+    
     nr = InitNornir(config_file="config.yaml")
+    
+    passwords = read_passwords_from_file('passwords.txt')
 
     while True:
         group_name = input("Enter the device group name: ")
         filtered_nr, hosts = filter_group(nr, group_name)
 
         if filtered_nr is not None:
-            passwords = {}
-            connected_devices = []  
+            connected_devices = []
             for host in hosts:
                 host_ip = nr.inventory.hosts[host].hostname
-                if test_connection(host_ip):  
-                    password = getpass("Enter the password for device \033[33m{}\033[0m: ".format(host))
-                    passwords[host] = password
-                    connected_devices.append(host)  
+                if test_connection(host_ip):
+                    if host not in passwords:
+                        print(f"\033[91mPassword for device {host} not found in file, skipping...\033[0m\n")
+                        continue
+                    connected_devices.append(host)
                 else:
-                    print(f"\033[91mCannot connect to device {host} , skipping...\033[0m\n")
+                    print(f"\033[91mCannot connect to device {host}, skipping...\033[0m\n")
 
             if connected_devices:
                 break
@@ -694,16 +726,16 @@ def main():
                 filtered_nr, hosts = filter_group(nr, group_name)
 
                 if filtered_nr is not None:
-                    passwords = {}
-                    connected_devices = []  
+                    connected_devices = []
                     for host in hosts:
                         host_ip = nr.inventory.hosts[host].hostname
-                        if test_connection(host_ip):  
-                            password = getpass("Enter the password for device \033[33m{}\033[0m: ".format(host))
-                            passwords[host] = password
-                            connected_devices.append(host)  
+                        if test_connection(host_ip):
+                            if host not in passwords:
+                                print(f"\033[91mPassword for device {host} not found in file, skipping...\033[0m\n")
+                                continue
+                            connected_devices.append(host)
                         else:
-                            print(f"\033[91mCannot connect to device {host} , skipping...\033[0m\n")
+                            print(f"\033[91mCannot connect to device {host}, skipping...\033[0m\n")
 
                     if connected_devices:
                         break
