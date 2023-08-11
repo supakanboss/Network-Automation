@@ -1,110 +1,198 @@
 ---
-mainro1:
-  hostname: 192.168.85.141
-  username: mainro1
-  password: "123456"
+RouterA:
+  hostname: 172.16.1.11
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - main
-    - mainro
+    - rack1
+    - router
+    - router-a
 
-mainsw1:
-  hostname: 192.168.85.142
-  username: mainsw1
-  password: "123456"
+Core-SwitchA:
+  hostname: 172.16.1.12
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - main
-    - mainsw
+    - rack1
+    - switch
+    - core-switch-a
 
-ro1:
-  hostname: 192.168.85.143
-  username: ro1
-  password: "123456"
+Access-SwitchA:
+  hostname: 172.16.1.13
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row1
-    - routerrow1
+    - rack1
+    - switch
+    - access-switch-a
 
-sw101:
-  hostname: 192.168.85.146
-  username: sw101
-  password: "123456"
+RouterB:
+  hostname: 172.16.1.21
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row1
-    - switchrow1
+    - rack1
+    - router
+    - router-b
 
-sw102:
-  hostname: 192.168.85.149
-  username: sw102
-  password: "123456"
+Core-SwitchB:
+  hostname: 172.16.1.22
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row1
-    - switchrow1
+    - rack1
+    - switch
+    - core-switch-b
 
-ro2:
-  hostname: 192.168.85.144
-  username: ro2
-  password: "123456"
+Access-SwitchB:
+  hostname: 172.16.1.23
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row2
-    - routerrow2
+    - rack1
+    - switch
+    - access-switch-b
 
-sw201:
-  hostname: 192.168.85.147
-  username: sw201
-  password: "123456"
+RouterC:
+  hostname: 172.16.1.31
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row2
-    - switchrow2
+    - rack1
+    - router
+    - router-c
 
-sw202:
-  hostname: 192.168.85.150
-  username: sw202
-  password: "123456"
+Core-SwitchC:
+  hostname: 172.16.1.32
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row2
-    - switchrow2
+    - rack1
+    - switch
+    - core-switch-c
 
-ro3:
-  hostname: 192.168.85.145
-  username: ro3
-  password: "123456"
+Access-SwitchC:
+  hostname: 172.16.1.33
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row3
-    - routerrow3
+    - rack1
+    - switch
+    - access-switch-c
 
-sw301:
-  hostname: 192.168.85.148
-  username: sw301
-  password: "123456"
+RouterD:
+  hostname: 172.16.1.41
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row3
-    - switchrow3
+    - rack1
+    - router
+    - router-d
 
-sw302:
-  hostname: 192.168.85.151
-  username: sw302
-  password: "123456"
+Core-SwitchD:
+  hostname: 172.16.1.42
+  username: cpe
+  password: "cpesecret"
   platform: cisco_ios_telnet
   groups:
     - all
-    - row3
-    - switchrow3
+    - rack1
+    - switch
+    - core-switch-d
+
+Access-SwitchD:
+  hostname: 172.16.1.43
+  username: cpe
+  password: "cpesecret"
+  platform: cisco_ios_telnet
+  groups:
+    - all
+    - rack1
+    - switch
+    - access-switch-d
+
+RouterE:
+  hostname: 172.16.1.51
+  username: cpe
+  password: "cpesecret"
+  platform: cisco_ios_telnet
+  groups:
+    - all
+    - rack1
+    - router
+    - router-e
+
+Core-SwitchE:
+  hostname: 172.16.1.52
+  username: cpe
+  password: "cpesecret"
+  platform: cisco_ios_telnet
+  groups:
+    - all
+    - rack1
+    - switch
+    - core-switch-e
+
+Access-SwitchE:
+  hostname: 172.16.1.53
+  username: cpe
+  password: "cpesecret"
+  platform: cisco_ios_telnet
+  groups:
+    - all
+    - rack1
+    - switch
+    - access-switch-e
+
+RouterF:
+  hostname: 172.16.1.61
+  username: cpe
+  password: "cpesecret"
+  platform: cisco_ios_telnet
+  groups:
+    - all
+    - rack1
+    - router
+    - router-f
+
+Core-SwitchF:
+  hostname: 172.16.1.62
+  username: cpe
+  password: "cpesecret"
+  platform: cisco_ios_telnet
+  groups:
+    - all
+    - rack1
+    - switch
+    - core-switch-f
+
+Access-SwitchF:
+  hostname: 172.16.1.63
+  username: cpe
+  password: "cpesecret"
+  platform: cisco_ios_telnet
+  groups:
+    - all
+    - rack1
+    - switch
+    - access-switch-f

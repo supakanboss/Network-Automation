@@ -1,31 +1,63 @@
 ---
 all:
   platform: cisco_ios
-main:
-  platform: cisco_ios
-mainro: 
-  platform: cisco_ios
-mainsw: 
+
+rack1:
   platform: cisco_ios
 
-
-row1: 
-  platform: cisco_ios
-routerrow1: 
-  platform: cisco_ios
-switchrow1: 
+rack2:
   platform: cisco_ios
 
-row2: 
-  platform: cisco_ios
-routerrow2:
-  platform: cisco_ios
-switchrow2: 
+router:
   platform: cisco_ios
 
-row3: 
+switch:
   platform: cisco_ios
-routerrow3:
+
+core-switch:
   platform: cisco_ios
-switchrow3: 
+
+access-switch:
+  platform: cisco_ios
+
+router-a:
+  platform: cisco_ios
+core-switch-a:
+  platform: cisco_ios
+access-switch-a:
+  platform: cisco_ios
+
+router-b:
+  platform: cisco_ios
+core-switch-b:
+  platform: cisco_ios
+access-switch-b:
+  platform: cisco_ios
+
+router-c:
+  platform: cisco_ios
+core-switch-c:
+  platform: cisco_ios
+access-switch-c:
+  platform: cisco_ios
+
+router-d:
+  platform: cisco_ios
+core-switch-d:
+  platform: cisco_ios
+access-switch-d:
+  platform: cisco_ios
+
+router-e:
+  platform: cisco_ios
+core-switch-e:
+  platform: cisco_ios
+access-switch-e:
+  platform: cisco_ios
+
+router-f:
+  platform: cisco_ios
+core-switch-f:
+  platform: cisco_ios
+access-switch-f:
   platform: cisco_ios
