@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import traceback
 from getpass import getpass
@@ -20,15 +21,9 @@ def test_connection(host):
         return False
 
 def read_passwords_from_file(filename):
-    passwords = {}
     with open(filename, 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            line = line.strip()
-            if line: 
-                device_name, password = line.split(',')
-                passwords[device_name] = password
-    return passwords
+        data = json.load(file)
+        return data
 
 def custom_exception_handler(e, device_name):
     frames = traceback.extract_tb(e.__traceback__)
@@ -43,7 +38,7 @@ def custom_exception_handler(e, device_name):
 def send_command(task, command):
     device_name = task.host.name
 
-    passwords = read_passwords_from_file("passwords.txt")
+    passwords = read_passwords_from_file("passwords.json")
     password = passwords.get(device_name)
 
     net_connect = None
@@ -649,7 +644,7 @@ def main():
     
     nr = InitNornir(config_file="config.yaml")
     
-    passwords = read_passwords_from_file('passwords.txt')
+    passwords = read_passwords_from_file('passwords.json')
 
     while True:
         group_name = input("Enter the device group name: ")
