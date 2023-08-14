@@ -7,7 +7,7 @@
 ## 2. Installation Guide
 To set up the necessary environment for your Python script, you'll need to install the following libraries:
 
-* Nornir
+#* Nornir
     * [Nornir](https://nornir.tech/) is a Python framework that helps with automating networks.
 
 ```bash
