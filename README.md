@@ -28,7 +28,7 @@ pip install netmiko
 pip install nornir_utils
 ```
 
- After installing the above libraries, your script ready to run!
+After installing the above libraries, your script ready to run!
 
 ### this script is a network automation tool. It uses Nornir, a Python framework, to manage and execute commands on network devices, and Netmiko for the actual communication with devices. The script allows users to interactively select a group of devices and execute various tasks on those devices.
 
