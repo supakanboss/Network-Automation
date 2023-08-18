@@ -82,6 +82,30 @@ def filter_group(nr, group_name):
         print("No devices found in group \033[33m{}\033[0m.".format(group_name))
         return None, None
 
+def change_device_group(nr, passwords):
+    while True:
+        group_name = input("Enter the device group name: ")
+        filtered_nr, hosts = filter_group(nr, group_name)
+
+        if filtered_nr is not None:
+            connected_devices = []
+            for host in hosts:
+                host_ip = nr.inventory.hosts[host].hostname
+                if test_connection(host_ip):
+                    if host not in passwords:
+                        print(f"\033[91mPassword for device {host} not found in file, skipping...\033[0m\n")
+                        continue
+                    connected_devices.append(host)
+                else:
+                    print(f"\033[91mCannot connect to device {host}, skipping...\033[0m\n")
+
+            if connected_devices:
+                return group_name, filtered_nr
+            else:
+                print("No devices in this group could be connected to. Please choose another group.\n")
+        else:
+            print("Invalid device group. Please enter a valid group name.")
+
 def show_data(filtered_nr, group_name):
     
     print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
@@ -638,119 +662,91 @@ def restore_config(filtered_nr):
 
     print("\033[92mConfig restore complete.\033[0m")
 
+def auto_config_vlan(filtered_nr):
+    num_vlans = int(input("How many VLANs do you want to create : "))
+
+    total_interfaces = 15
+    interfaces_per_vlan = total_interfaces // num_vlans
+
+    base_vlan_id = 100
+    vlans = [base_vlan_id + (i * 100) for i in range(num_vlans)]
+
+    config_commands = ["enable"]
+
+    for vlan in vlans:
+        config_commands += [
+            "vlan database",
+            f"vlan {vlan}",
+            "exit"
+        ]
+
+    config_commands.append("conf t")
+    current_interface = 1
+
+    for i, vlan in enumerate(vlans):
+        for _ in range(interfaces_per_vlan):
+            config_commands += [
+                f"interface fa 1/{current_interface}",
+                f"switchport mode access",
+                f"switchport access vlan {vlan}"
+            ]
+            print(f"Assigned fa 1/{current_interface} to VLAN {vlan}")
+            current_interface += 1
+
+    config_str = "\n".join(config_commands)
+    result = filtered_nr.run(task=send_command, command=config_str)
+    print_result(result)
+    filtered_nr.close_connections()
+
 def main():
-
     global passwords
-    
+
     nr = InitNornir(config_file="config.yaml")
-    
     passwords = read_passwords_from_file('passwords.json')
-
-    while True:
-        group_name = input("Enter the device group name: ")
-        filtered_nr, hosts = filter_group(nr, group_name)
-
-        if filtered_nr is not None:
-            connected_devices = []
-            for host in hosts:
-                host_ip = nr.inventory.hosts[host].hostname
-                if test_connection(host_ip):
-                    if host not in passwords:
-                        print(f"\033[91mPassword for device {host} not found in file, skipping...\033[0m\n")
-                        continue
-                    connected_devices.append(host)
-                else:
-                    print(f"\033[91mCannot connect to device {host}, skipping...\033[0m\n")
-
-            if connected_devices:
-                break
-            else:
-                print("No devices in this group could be connected to. Please choose another group.\n")
-        else:
-            print("Invalid device group. Please enter a valid group name.")
+    group_name, filtered_nr = change_device_group(nr, passwords)
 
     while True:
         print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
         print("1 - Show Data")
         print("2 - Set IPv4 Address")
-        print("3 - Set VLAN")
-        print("4 - Set Ether Channel")
-        print("5 - Set Static  Routing")
-        print("6 - Set Dynamic Routing")
-        print("7 - Set DHCP")
-        print("8 - Set NAT/PAT")
-        print("9 - IPv6")
-        print("10 - Change Device Group")
-        print("11 - Backup Config")
-        print("12 - Restore Config")
-        print("13 - Exit\n")
+        print("3 - Set Auto VLAN")
+        print("4 - Set VLAN")
+        print("5 - Set Ether Channel")
+        print("6 - Set Static  Routing")
+        print("7 - Set Dynamic Routing")
+        print("8 - Set DHCP")
+        print("9 - Set NAT/PAT")
+        print("10 - IPv6")
+        print("11 - Change Device Group")
+        print("12 - Backup Config")
+        print("13 - Restore Config")
+        print("14 - Exit\n")
         print("********************")
 
-        user_action = input("Choose action : ")
-
-        if user_action == "1":
-            show_data(filtered_nr, group_name)
-            
-        elif user_action == "2":
-            set_ipv4(filtered_nr)
-            
-        elif user_action == "3":
-            set_vlan(filtered_nr, group_name)
-            
-        elif user_action == "4":
-            set_ether_channel(filtered_nr)
-            
-        elif user_action == "5":
-            set_static_routing(filtered_nr)
-            
-        elif user_action == "6":
-            set_dynamic_routing(filtered_nr, group_name)
-            
-        elif user_action == "7":
-            set_dhcp(filtered_nr, group_name)
-            
-        elif user_action == "8":
-            set_nat_pat(filtered_nr, group_name
-                        )
-        elif user_action == "9":
-            ipv6(filtered_nr, group_name)
-            
-        elif user_action == "10":
-            while True:
-                group_name = input("Enter the device group name: ")
-                filtered_nr, hosts = filter_group(nr, group_name)
-
-                if filtered_nr is not None:
-                    connected_devices = []
-                    for host in hosts:
-                        host_ip = nr.inventory.hosts[host].hostname
-                        if test_connection(host_ip):
-                            if host not in passwords:
-                                print(f"\033[91mPassword for device {host} not found in file, skipping...\033[0m\n")
-                                continue
-                            connected_devices.append(host)
-                        else:
-                            print(f"\033[91mCannot connect to device {host}, skipping...\033[0m\n")
-
-                    if connected_devices:
-                        break
-                    else:
-                        print("No devices in this group could be connected to. Please choose another group.\n")
-                else:
-                    print("Invalid device group. Please enter a valid group name.")
-                    
-        elif user_action == "11":
-            backup_config(filtered_nr)
-            
-        elif user_action == "12":
-            restore_config(filtered_nr)
-            
-        elif user_action == "13":
-            print("Exiting program...")
-            break
+        actions = {
+            "1": lambda: show_data(filtered_nr, group_name),
+            "2": lambda: set_ipv4(filtered_nr),
+            "3": lambda: auto_config_vlan(filtered_nr),
+            "4": lambda: set_vlan(filtered_nr, group_name),
+            "5": lambda: set_ether_channel(filtered_nr),  
+            "6": lambda: set_static_routing(filtered_nr),  
+            "7": lambda: set_dynamic_routing(filtered_nr, group_name),
+            "8": lambda: set_dhcp(filtered_nr, group_name),
+            "9": lambda: set_nat_pat(filtered_nr, group_name),
+            "10": lambda: ipv6(filtered_nr, group_name),
+            "11": lambda: change_device_group(nr, passwords),
+            "12": lambda: backup_config(filtered_nr),
+            "13": lambda: restore_config(filtered_nr),
+            "14": lambda: exit("Exiting program...")
+        }
         
+        user_action = input("Choose action: ")
+
+        if user_action in actions:
+            actions[user_action]()
         else:
             print("Invalid selection. Please try again.")
+
 
 if __name__ == "__main__":
     main()
