@@ -68,7 +68,7 @@ def send_command(task, command):
 
     return result
 
-def send_command_auto(host, command):
+def send_command_host(host, command):
     device_name = host.name
 
     passwords = read_passwords_from_file("passwords.json")
@@ -101,8 +101,7 @@ def send_command_auto(host, command):
 
     return result
 
-def filter_group(nr, group_name):
-    
+def filter_group(nr, group_name):    
     filtered_nr = nr.filter(F(groups__contains=group_name))
     hosts = filtered_nr.inventory.hosts
     num_hosts = len(hosts)
@@ -698,7 +697,7 @@ def restore_config(filtered_nr):
 def auto_config_vlan(filtered_nr):
     num_vlans = int(input("How many VLANs do you want to create : "))
 
-    total_interfaces = 15
+    total_interfaces = 22
     interfaces_per_vlan = total_interfaces // num_vlans
 
     base_vlan_id = 100
@@ -708,22 +707,21 @@ def auto_config_vlan(filtered_nr):
 
     for vlan in vlans:
         config_commands += [
-            "vlan database",
+            "conf t",
             f"vlan {vlan}",
             "exit"
         ]
 
-    config_commands.append("conf t")
     current_interface = 1
 
     for i, vlan in enumerate(vlans):
         for _ in range(interfaces_per_vlan):
             config_commands += [
-                f"interface fa 1/{current_interface}",
+                f"interface g1/0/{current_interface}",
                 f"switchport mode access",
                 f"switchport access vlan {vlan}"
             ]
-            print(f"Assigned fa 1/{current_interface} to VLAN {vlan}")
+            print(f"Assigned fa g1/0/{current_interface} to VLAN {vlan}")
             current_interface += 1
 
     config_str = "\n".join(config_commands)
@@ -732,9 +730,9 @@ def auto_config_vlan(filtered_nr):
     filtered_nr.close_connections()
 
 def auto_generate_ip(filtered_nr):
+    
     third_octet_increment = 10
     
-    # Requesting user inputs
     base_ip = input("Enter the base IP address (e.g., 192.168.x.1): ")
     interface_choice = input("Choose interface (inside/outside): ")
     
@@ -744,12 +742,11 @@ def auto_generate_ip(filtered_nr):
         print("Invalid IP address provided.")
         return
 
-    base_third_octet = 10 if base_parts[2] == 'x' else int(base_parts[2])  # We initialize to 10 if 'x' is detected
+    base_third_octet = 10 if base_parts[2] == 'x' else int(base_parts[2])  
     
-    # Map interface choice to actual interface name
     interface_map = {
-        "inside": "interface fa 0/0",
-        "outside": "interface fa 0/1"
+        "inside": "interface fa g0/0/0",
+        "outside": "interface fa g0/0/1"
     }
     
     interface = interface_map.get(interface_choice)
@@ -758,10 +755,8 @@ def auto_generate_ip(filtered_nr):
         return
 
     for host in filtered_nr.inventory.hosts.values():
-        # Construct the new IP
         new_ip = ".".join(base_parts[:2] + [str(base_third_octet)] + [base_parts[3]])
         
-        # Build the configuration string
         config = f"""
         enable
         conf t
@@ -771,8 +766,7 @@ def auto_generate_ip(filtered_nr):
         end
         """
         
-        # Execute the command on the device
-        result = send_command_auto(host, config)
+        result = send_command_host(host, config)
         if "error" not in result.lower() and "invalid" not in result.lower():
             print(f"Configured {host} with IP {new_ip} on {interface_choice} interface.")
         else:
