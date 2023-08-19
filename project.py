@@ -68,6 +68,39 @@ def send_command(task, command):
 
     return result
 
+def send_command_auto(host, command):
+    device_name = host.name
+
+    passwords = read_passwords_from_file("passwords.json")
+    password = passwords.get(device_name)
+
+    net_connect = None
+
+    if password is None:
+        # If password is not found for the device in the file, then log an error.
+        logging.error(f"\033[91m Password not found for {device_name} \033[0m")
+        return "Password not found for device"
+    
+    if not test_connection(host.hostname):
+        logging.error(f"\033[91m Cannot connect to {device_name} \033[0m")  
+        return "Cannot connect to device"
+
+    device_type = host.get('device_type', 'cisco_ios_telnet')
+    
+    try:
+        net_connect = ConnectHandler(device_type=device_type, ip=host.hostname, username=host.username, password=password)
+        result = net_connect.send_command_timing("enable")
+        if "Password:" in result:  
+            result += net_connect.send_command_timing(password)
+        result += net_connect.send_command_timing(command)
+    except Exception as e:
+        result = custom_exception_handler(e, device_name)
+    finally:
+        if net_connect:
+            net_connect.disconnect()
+
+    return result
+
 def filter_group(nr, group_name):
     
     filtered_nr = nr.filter(F(groups__contains=group_name))
@@ -698,6 +731,54 @@ def auto_config_vlan(filtered_nr):
     print_result(result)
     filtered_nr.close_connections()
 
+def auto_generate_ip(filtered_nr):
+    third_octet_increment = 10
+    
+    # Requesting user inputs
+    base_ip = input("Enter the base IP address (e.g., 192.168.x.1): ")
+    interface_choice = input("Choose interface (inside/outside): ")
+    
+    base_parts = base_ip.split(".")
+    
+    if not (len(base_parts) == 4 and (base_parts[2] == 'x' or (0 <= int(base_parts[2]) < 256))):
+        print("Invalid IP address provided.")
+        return
+
+    base_third_octet = 10 if base_parts[2] == 'x' else int(base_parts[2])  # We initialize to 10 if 'x' is detected
+    
+    # Map interface choice to actual interface name
+    interface_map = {
+        "inside": "interface fa 0/0",
+        "outside": "interface fa 0/1"
+    }
+    
+    interface = interface_map.get(interface_choice)
+    if not interface:
+        print("Invalid interface choice.")
+        return
+
+    for host in filtered_nr.inventory.hosts.values():
+        # Construct the new IP
+        new_ip = ".".join(base_parts[:2] + [str(base_third_octet)] + [base_parts[3]])
+        
+        # Build the configuration string
+        config = f"""
+        enable
+        conf t
+        {interface}
+        no shutdown
+        ip address {new_ip} 255.255.255.0
+        end
+        """
+        
+        # Execute the command on the device
+        result = send_command_auto(host, config)
+        if "error" not in result.lower() and "invalid" not in result.lower():
+            print(f"Configured {host} with IP {new_ip} on {interface_choice} interface.")
+        else:
+            print(f"An error occurred while configuring {host}: {result}")
+        base_third_octet += third_octet_increment
+
 def main():
     global passwords
 
@@ -708,36 +789,38 @@ def main():
     while True:
         print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
         print("1 - Show Data")
-        print("2 - Set IPv4 Address")
-        print("3 - Set Auto VLAN")
-        print("4 - Set VLAN")
-        print("5 - Set Ether Channel")
-        print("6 - Set Static  Routing")
-        print("7 - Set Dynamic Routing")
-        print("8 - Set DHCP")
-        print("9 - Set NAT/PAT")
-        print("10 - IPv6")
-        print("11 - Change Device Group")
-        print("12 - Backup Config")
-        print("13 - Restore Config")
-        print("14 - Exit\n")
+        print("2 - Auto Set IPv4 Address")
+        print("3 - Set IPv4 Address")
+        print("4 - Auto Set VLAN")
+        print("5 - Set VLAN")
+        print("6 - Set Ether Channel")
+        print("7 - Set Static  Routing")
+        print("8 - Set Dynamic Routing")
+        print("9 - Set DHCP")
+        print("10 - Set NAT/PAT")
+        print("11 - IPv6")
+        print("12 - Change Device Group")
+        print("13 - Backup Config")
+        print("14 - Restore Config")
+        print("15 - Exit\n")
         print("********************")
 
         actions = {
             "1": lambda: show_data(filtered_nr, group_name),
-            "2": lambda: set_ipv4(filtered_nr),
-            "3": lambda: auto_config_vlan(filtered_nr),
-            "4": lambda: set_vlan(filtered_nr, group_name),
-            "5": lambda: set_ether_channel(filtered_nr),  
-            "6": lambda: set_static_routing(filtered_nr),  
-            "7": lambda: set_dynamic_routing(filtered_nr, group_name),
-            "8": lambda: set_dhcp(filtered_nr, group_name),
-            "9": lambda: set_nat_pat(filtered_nr, group_name),
-            "10": lambda: ipv6(filtered_nr, group_name),
-            "11": lambda: change_device_group(nr, passwords),
-            "12": lambda: backup_config(filtered_nr),
-            "13": lambda: restore_config(filtered_nr),
-            "14": lambda: exit("Exiting program...")
+            "2": lambda: auto_generate_ip(filtered_nr),
+            "3": lambda: set_ipv4(filtered_nr),
+            "4": lambda: auto_config_vlan(filtered_nr),
+            "5": lambda: set_vlan(filtered_nr, group_name),
+            "6": lambda: set_ether_channel(filtered_nr),  
+            "7": lambda: set_static_routing(filtered_nr),  
+            "8": lambda: set_dynamic_routing(filtered_nr, group_name),
+            "9": lambda: set_dhcp(filtered_nr, group_name),
+            "10": lambda: set_nat_pat(filtered_nr, group_name),
+            "11": lambda: ipv6(filtered_nr, group_name),
+            "12": lambda: change_device_group(nr, passwords),
+            "13": lambda: backup_config(filtered_nr),
+            "14": lambda: restore_config(filtered_nr),
+            "15": lambda: exit("Exiting program...")
         }
         
         user_action = input("Choose action: ")
@@ -746,7 +829,6 @@ def main():
             actions[user_action]()
         else:
             print("Invalid selection. Please try again.")
-
 
 if __name__ == "__main__":
     main()
