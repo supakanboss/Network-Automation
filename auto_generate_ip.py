@@ -16,8 +16,8 @@ def auto_generate_ip(filtered_nr):
     base_third_octet = 10 if base_parts[2] == 'x' else int(base_parts[2])  
     
     interface_map = {
-        "inside": "interface fa g0/0/0",
-        "outside": "interface fa g0/0/1"
+        "inside": "interface g0/0/0",
+        "outside": "interface g0/0/1"
     }
     
     interface = interface_map.get(interface_choice)
