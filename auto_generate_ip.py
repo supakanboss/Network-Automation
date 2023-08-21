@@ -9,12 +9,13 @@ def auto_generate_ip(filtered_nr):
     
     base_parts = base_ip.split(".")
     
-    if not (len(base_parts) == 4 and (base_parts[2] == 'x' or (0 <= int(base_parts[2]) < 256))):
+    if len(base_parts) != 4 or 'x' not in base_ip:
         print("Invalid IP address provided.")
         return
 
-    base_third_octet = 10 if base_parts[2] == 'x' else int(base_parts[2])  
-    
+    x_position = base_parts.index('x')  
+    base_parts[x_position] = '10'  
+
     interface_map = {
         "inside": "interface g0/0/0",
         "outside": "interface g0/0/1"
@@ -26,7 +27,7 @@ def auto_generate_ip(filtered_nr):
         return
 
     for host in filtered_nr.inventory.hosts.values():
-        new_ip = ".".join(base_parts[:2] + [str(base_third_octet)] + [base_parts[3]])
+        new_ip = ".".join(base_parts)
         
         config = f"""
         enable
@@ -42,4 +43,6 @@ def auto_generate_ip(filtered_nr):
             print(f"Configured {host} with IP {new_ip} on {interface_choice} interface.")
         else:
             print(f"An error occurred while configuring {host}: {result}")
-        base_third_octet += third_octet_increment
+
+        # Increment the value in the position where 'x' was
+        base_parts[x_position] = str(int(base_parts[x_position]) + third_octet_increment)
