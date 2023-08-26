@@ -8,7 +8,7 @@ inventory:
 runner:
     plugin: threaded
     options:
-        num_workers: 128
+        num_workers: 1024
 
 logging:
   level: INFO

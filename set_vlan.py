@@ -49,7 +49,7 @@ def set_native_vlan(filtered_nr):
     print_result(result) 
     filtered_nr.close_connections()
 
-def set_ipv4_address_in_vlan(filtered_nr):
+def set_svi_from_vlan(filtered_nr):
     
     set_vlan_command = "enable\nconf t\n"
     
@@ -70,7 +70,7 @@ def set_vlan(filtered_nr, group_name):
     print("1 - Set VLAN")
     print("2 - Set Trunk")
     print("3 - Set Native VLAN")
-    print("4 - Set IPv4 Address in VLAN")
+    print("4 - Set SVI From VLAN")
     print("5 - Back\n")
     print("********************")
     action = input("Choose action: ")  
@@ -85,7 +85,7 @@ def set_vlan(filtered_nr, group_name):
         set_native_vlan(filtered_nr)
     
     elif action == "4":
-        set_ipv4_address_in_vlan(filtered_nr)
+        set_svi_from_vlan(filtered_nr)
     
     elif action == "5":
         return
