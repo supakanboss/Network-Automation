@@ -6,8 +6,8 @@ inventory:
     group_file: inventory/groups.yaml
 
 runner:
-  plugin: threaded
-  options:
+    plugin: threaded
+    options:
         num_workers: 128
 
 logging:
