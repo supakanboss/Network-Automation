@@ -1,3 +1,4 @@
+from showdata import show_ip_route
 from connection_command import send_command
 from nornir_utils.plugins.functions import print_result
 
@@ -13,3 +14,4 @@ def set_static_routing(filtered_nr):
     result = filtered_nr.run(task=send_command, command=routing_command)
     print_result(result)
     filtered_nr.close_connections()
+    show_ip_route(filtered_nr)

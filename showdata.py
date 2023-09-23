@@ -166,7 +166,7 @@ def show_data(filtered_nr, group_name):
     print("7 - Show IP OSPF Border routers")
     print("8 - Show IP OSPF Neighbor")
     print("9 - Show IP EIGRP Neighbors")
-    print("10 - Show IPv6 Interface ")
+    print("10 - Show IPv6 Interface")
     print("11 - Show IPv6 Route")
     print("12 - Show IPv6 OSPF Neighbor")
     print("13 - Show IP NAT Statistics")

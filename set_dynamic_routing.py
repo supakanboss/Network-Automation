@@ -1,3 +1,4 @@
+from showdata import show_ip_route, show_ospf_border_routers, show_ospf_neighbor, show_eigrp_neighbor
 from connection_command import send_command
 from nornir_utils.plugins.functions import print_result
 
@@ -6,7 +7,7 @@ def set_router_id(filtered_nr):
     routing_command = "enable\nconf t\n"
     
     router_ospf_process = input("Enter the Router OSPF process number: ")
-    router_id = input("Enter the Router ID (ex. 1.1.1.1): ")
+    router_id = input("Enter the Router ID (e.g., 1.1.1.1): ")
     
     routing_command += f"router ospf {router_ospf_process}\n"
     routing_command += f"router-id {router_id}\n"
@@ -40,7 +41,7 @@ def set_virtual_link(filtered_nr):
     
     router_ospf_process = input("Enter the Router OSPF process number: ")
     ospf_area = input("Enter the OSPF area: ")
-    router_id = input("Enter the Router ID (ex. 1.1.1.1): ")
+    router_id = input("Enter the Router ID (e.g., 1.1.1.1): ")
         
     routing_command += f"router ospf {router_ospf_process}\n"
     routing_command += f"area {ospf_area} virtual-link {router_id}\n"
@@ -101,8 +102,12 @@ def set_dynamic_routing(filtered_nr, group_name):
     print("3 - Set Virtual Link")
     print("4 - Set EIGRP")
     print("5 - Set Redistribute")
-    print("6 - Clear OSPF process")
-    print("7 - Back\n")
+    print("6 - Clear OSPF process\n")
+    print("7 - Show IP Route")
+    print("8 - Show IP OSPF Border routers")
+    print("9 - Show IP OSPF Neighbor")
+    print("10 - Show IP EIGRP Neighbors")
+    print("11 - Back\n")
     print("********************")
     action = input("Choose action : ")
     
@@ -125,4 +130,16 @@ def set_dynamic_routing(filtered_nr, group_name):
         clear_ospf_process(filtered_nr)
     
     elif action == "7":
+        show_ip_route(filtered_nr)
+    
+    elif action == "8":
+        show_ospf_border_routers(filtered_nr)
+    
+    elif action == "9":
+        show_ospf_neighbor(filtered_nr)
+    
+    elif action == "10":
+        show_eigrp_neighbor(filtered_nr)
+    
+    elif action == "11":
         return

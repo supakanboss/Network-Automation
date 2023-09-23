@@ -1,3 +1,4 @@
+from showdata import show_ip_nat_statistics, show_nat_translations, show_access_list
 from connection_command import send_command
 from nornir_utils.plugins.functions import print_result
 
@@ -22,7 +23,7 @@ def set_pat_one_public_ip_address(filtered_nr):
     ip_access_list_name = input("Enter the IP access list Standard name: ")
     network_address = input("Enter the Network address (comma-separated): ").split(',')
     wildcard_masks = input("Enter the Wildcard masks (comma-separated): ").split(',')
-    interface = input("Enter the Out side interface (ex. f1/1): ")
+    interface = input("Enter the Out side interface (e.g., f1/1): ")
         
     set_nat_pat_command += f"ip access-list standard {ip_access_list_name}\n"
         
@@ -65,7 +66,7 @@ def set_out_side(filtered_nr):
     
     set_nat_pat_command = "enable\nconf t\n"
     
-    interface = input("Enter the NAT Out-side Interface (ex. f1/1): ")
+    interface = input("Enter the NAT Out-side Interface (e.g., f1/1): ")
     set_nat_pat_command += f"interface {interface}\n"
     set_nat_pat_command += "ip nat outside\n"
     
@@ -77,7 +78,7 @@ def set_in_side(filtered_nr):
     
     set_nat_pat_command = "enable\nconf t\n"
     
-    interface = input("Enter the NAT In-side Interface (ex. f1/1): ")
+    interface = input("Enter the NAT In-side Interface (e.g., f1/1): ")
     set_nat_pat_command += f"interface {interface}\n"
     set_nat_pat_command += "ip nat inside\n"
     
@@ -92,8 +93,11 @@ def set_nat_pat(filtered_nr, group_name):
     print("2 - Set PAT 1 Public ip address")
     print("3 - Set PAT more than 1 Public ip address")
     print("4 - Set Out side")
-    print("5 - Set In side")
-    print("6 - Back\n")
+    print("5 - Set In side\n")
+    print("6 - Show IP NAT Statistics")
+    print("7 - Show IP NAT Translations")
+    print("8 - Show Access list")
+    print("9 - Back\n")
     print("********************")
     action = input("Choose action : ")
     
@@ -113,4 +117,13 @@ def set_nat_pat(filtered_nr, group_name):
         set_in_side(filtered_nr)
     
     elif action == "6":
+        show_ip_nat_statistics(filtered_nr)
+        
+    elif action == "7":
+        show_nat_translations(filtered_nr)
+        
+    elif action == "8":
+        show_access_list(filtered_nr)
+    
+    elif action == "9":
         return

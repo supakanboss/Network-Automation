@@ -1,3 +1,4 @@
+from showdata import show_ipv6_interface, show_ipv6_ospf_neighbor, show_ipv6_route
 from connection_command import send_command
 from nornir_utils.plugins.functions import print_result
 
@@ -5,7 +6,7 @@ def set_ipv6_address_in_interface(filtered_nr):
     
     ipv6_command = "enable\nconf t\n"
     
-    interface = input("Enter the Interface (ex. f1/1): ")
+    interface = input("Enter the Interface (e.g., f1/1): ")
     address = input("Enter the IPv6 address: ")
     prefix_lengths = input("Enter the Prefix Lengths: ")
     
@@ -39,7 +40,7 @@ def set_ipv6_eui64(filtered_nr):
     
     ipv6_command = "enable\nconf t\n"
     
-    interface = input("Enter the Interface (ex. f1/1 or vlan 10): ")
+    interface = input("Enter the Interface (e.g., f1/1 or vlan 10): ")
     address = input("Enter the IPv6 address: ")
     prefix_lengths = input("Enter the Prefix Lengths: ")
     
@@ -58,7 +59,7 @@ def set_ipv6_tunnel(filtered_nr):
     tunnel_number = input("Enter the Interface Tunnel Number: ")
     address = input("Enter the IPv6 address: ")
     prefix_lengths = input("Enter the Prefix Lengths: ")
-    tunnel_source = input("Enter the Tunnel Source (ex. g0/0/0): ")
+    tunnel_source = input("Enter the Tunnel Source (e.g., g0/0/0): ")
     tunnel_destination = input("Enter the Tunnel Destination (IPv4 Address): ")
         
     ipv6_command += f"interface tunnel {tunnel_number}\n"
@@ -76,7 +77,7 @@ def set_ipv6_router_id(filtered_nr):
     ipv6_command = "enable\nconf t\n"
     
     ospfv3_process_number = input("Enter the Router OSPFv3 process number: ")
-    router_id = input("Enter the Router ID (ex. 1.1.1.1): ")
+    router_id = input("Enter the Router ID (e.g., 1.1.1.1): ")
         
     ipv6_command += f"ipv6 router ospf {ospfv3_process_number}\n"
     ipv6_command += f"router-id {router_id}\n"
@@ -90,7 +91,7 @@ def set_ipv6_ospf3(filtered_nr):
     ipv6_command = "enable\nconf t\n"
     
     ospfv3_process_number = input("Enter the Router OSPFv3 process number: ")
-    interface = input("Enter the Interface (ex. f1/1-10,f1/14): ")
+    interface = input("Enter the Interface (e.g., f1/1-10,f1/14): ")
     ospfv3_area = input("Enter the OSPFv3 area: ")
         
     ipv6_command += f"interface {interface}\n"
@@ -121,8 +122,11 @@ def ipv6(filtered_nr, group_name):
     print("OSPFv3 Dynamic Routing\n")
     print("5 - Set Router ID")
     print("6 - Set OSPFv3")
-    print("7 - Clear IPv6 OSPF Process")
-    print("8 - Back\n")
+    print("7 - Clear IPv6 OSPF Process\n")
+    print("8 - Show IPv6 Interface")
+    print("9 - Show IPv6 Route")
+    print("10 - Show IPv6 OSPF Neighbor")
+    print("11 - Back\n")
     print("********************")
     action = input("Choose action : ")
     
@@ -148,4 +152,13 @@ def ipv6(filtered_nr, group_name):
         clear_ipv6_ospf_process(filtered_nr)
     
     elif action == "8":
+        show_ipv6_interface(filtered_nr)
+    
+    elif action == "9":
+        show_ipv6_route(filtered_nr)
+    
+    elif action == "10":
+        show_ipv6_ospf_neighbor(filtered_nr)
+    
+    elif action == "11":
         return

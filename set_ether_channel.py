@@ -1,9 +1,10 @@
+from showdata import show_etherchannel_summary
 from connection_command import send_command
 from nornir_utils.plugins.functions import print_result
 
 def set_ether_channel(filtered_nr):
     
-    interface = input("Enter the Interface (ex. f1/1-12): ")
+    interface = input("Enter the Interface (e.g., f1/1-12): ")
     channel_group_number = input("Enter the Channel group number: ")
     vlan_number = input("Enter the VLAN Number: ")
     
@@ -19,3 +20,4 @@ def set_ether_channel(filtered_nr):
     result = filtered_nr.run(task=send_command, command=set_ether_channel_command)
     print_result(result)
     filtered_nr.close_connections()
+    show_etherchannel_summary(filtered_nr)

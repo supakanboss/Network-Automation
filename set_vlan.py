@@ -1,3 +1,4 @@
+from showdata import show_vlan, show_interface_trunk
 from connection_command import send_command
 from nornir_utils.plugins.functions import print_result
 
@@ -7,7 +8,7 @@ def set_vlan_and_interface(filtered_nr):
     
     vlan_num = input("Enter the VLAN Number: ")
     vlan_name = input("Enter the VLAN Name: ")
-    interface = input("Enter the Interface (ex. f1/1-12): ")
+    interface = input("Enter the Interface (e.g., f1/1-12): ")
         
     set_vlan_command += f"vlan {vlan_num}\n"
     set_vlan_command += f"name {vlan_name}\n"
@@ -25,7 +26,7 @@ def set_trunk(filtered_nr):
     set_vlan_command = "enable\nconf t\n"
 
     vlan_num = input("Enter the VLAN Number: ")
-    interface = input("Enter the Interface (ex. f1/1): ")
+    interface = input("Enter the Interface (e.g., f1/1): ")
         
     set_vlan_command += f"interface {interface}\n"
     set_vlan_command += "switch mode trunk\n"
@@ -40,7 +41,7 @@ def set_native_vlan(filtered_nr):
     set_vlan_command = "enable\nconf t\n"
 
     vlan_num = input("Enter the Native VLAN Number: ")
-    interface = input("Enter the Trunk Interface (ex. f1/1): ")   
+    interface = input("Enter the Trunk Interface (e.g., f1/1): ")   
         
     set_vlan_command += f"interface {interface}\n"
     set_vlan_command += f"switch trunk native vlan {vlan_num}\n"
@@ -71,7 +72,9 @@ def set_vlan(filtered_nr, group_name):
     print("2 - Set Trunk")
     print("3 - Set Native VLAN")
     print("4 - Set SVI From VLAN")
-    print("5 - Back\n")
+    print("5 - Show VLAN")
+    print("6 - Show Trunk")
+    print("7 - Back\n")
     print("********************")
     action = input("Choose action: ")  
     
@@ -88,4 +91,10 @@ def set_vlan(filtered_nr, group_name):
         set_svi_from_vlan(filtered_nr)
     
     elif action == "5":
+        show_vlan(filtered_nr)
+    
+    elif action == "6":
+        show_interface_trunk(filtered_nr)
+    
+    elif action == "7":
         return
