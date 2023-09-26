@@ -6,7 +6,8 @@ from set_nat_pat import set_nat_pat
 from set_ether_channel import set_ether_channel
 from set_static_routing import set_static_routing
 from set_dynamic_routing import set_dynamic_routing
-def automation_interface(filtered_nr, group_name):
+
+def basic_interface(filtered_nr, group_name):
     print("******************** "+"---- \033[92mDevice Group : "+ group_name +"\033[0m -----\n")
     print("1 - Set IPv4")
     print("2 - Set VLAN")
