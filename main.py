@@ -1,6 +1,6 @@
 from nornir import InitNornir
 from showdata import show_data
-from connection_command import filter_group, test_connection,check_device_status
+from connection_command import check_device_status
 from backup_config import backup_config
 from restore_config import restore_config
 from automation_interface import automation_interface
