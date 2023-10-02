@@ -111,7 +111,7 @@ router-d:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - router
     - router-d
 
@@ -122,7 +122,7 @@ core-switch-d:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - switch
     - core-switch
     - core-switch-d
@@ -134,7 +134,7 @@ access-switch-d:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - switch
     - access-switch
     - access-switch-d
@@ -146,7 +146,7 @@ router-e:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - router
     - router-e
 
@@ -157,7 +157,7 @@ core-switch-e:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - switch
     - core-switch
     - core-switch-e
@@ -169,7 +169,7 @@ access-switch-e:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - switch
     - access-switch
     - access-switch-e
@@ -181,7 +181,7 @@ router-f:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - router
     - router-f
 
@@ -192,7 +192,7 @@ core-switch-f:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - switch
     - core-switch
     - core-switch-f
@@ -204,7 +204,7 @@ access-switch-f:
   platform: cisco_ios_telnet
   groups:
     - all
-    - rack1
+    - rack2
     - switch
     - access-switch
     - access-switch-f
