@@ -48,3 +48,6 @@ def basic_interface(filtered_nr, group_name):
                 
     elif action == "9":
         return
+    
+    else:
+        print("Invalid selection. Please try again.")

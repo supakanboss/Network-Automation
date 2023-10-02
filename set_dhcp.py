@@ -100,3 +100,6 @@ def set_dhcp(filtered_nr, group_name):
     
     if action == "6":
         return
+    
+    else:
+        print("Invalid selection. Please try again.")

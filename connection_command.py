@@ -12,6 +12,7 @@ def test_connection(host):
         s.settimeout(1)
         s.connect((host, 23))  
         s.close()
+        print(f"\033[92mSuccessfully connected to device {host} \033[0m")
         return True
     except Exception as e:
         print(f"\033[91mCannot connect to device {host} : {e} \033[0m")
@@ -59,6 +60,7 @@ def send_command(task, command):
         if "Password:" in result:  
             result += net_connect.send_command_timing(password)
         result += net_connect.send_command_timing(command)
+        print(f"\033[92mConnected to device {device_name}\033[0m")
     except Exception as e:
         result = custom_exception_handler(e, device_name)
     finally:
@@ -92,6 +94,7 @@ def send_command_host(host, command):
         if "Password:" in result:  
             result += net_connect.send_command_timing(password)
         result += net_connect.send_command_timing(command)
+        print(f"\033[92mConnected to device {device_name}\033[0m")
     except Exception as e:
         result = custom_exception_handler(e, device_name)
     finally:
@@ -114,6 +117,29 @@ def filter_group(nr, group_name):
         print("No devices found in group \033[33m{}\033[0m.".format(group_name))
         return None, None
 
+def check_device_status(nr):
+    print(f"Checking status of devices in the group:")
+    
+    filtered_nr = nr.filter(F(groups__contains="all"))
+    active_devices = []
+    inactive_devices = []
+    
+    for host in filtered_nr.inventory.hosts.values():
+        host_ip = host.hostname
+        if test_connection(host_ip):
+            active_devices.append(host.name)
+        else:
+            inactive_devices.append(host.name)
+    
+    print("\nActive devices:")
+    for device in active_devices:
+        print(f"\033[92m{device}\033[0m is active")
+    
+    print("\nInactive devices:")
+    for device in inactive_devices:
+        print(f"\033[91m{device}\033[0m is inactive")
+
+
 def change_device_group(nr, passwords):
     
     while True:
@@ -129,6 +155,7 @@ def change_device_group(nr, passwords):
                         print(f"\033[91mPassword for device {host} not found in file, skipping...\033[0m\n")
                         continue
                     connected_devices.append(host)
+                    print(f"\033[92mConnected to device {host} successfully!\033[0m\n")
                 else:
                     print(f"\033[91mCannot connect to device {host}, skipping...\033[0m\n")
 

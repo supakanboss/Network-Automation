@@ -143,3 +143,6 @@ def set_dynamic_routing(filtered_nr, group_name):
     
     elif action == "11":
         return
+    
+    else:
+        print("Invalid selection. Please try again.")

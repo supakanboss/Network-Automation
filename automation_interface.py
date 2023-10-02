@@ -1,5 +1,6 @@
 from auto_generate_ip import auto_generate_ip
 from auto_config_vlan import auto_config_vlan
+from configure_svi_from_vlan import configure_svi_from_vlan
 from showdata import show_ip_interface, show_vlan
 
 def automation_interface(filtered_nr, group_name):
@@ -21,7 +22,7 @@ def automation_interface(filtered_nr, group_name):
         auto_config_vlan(filtered_nr)
         
     elif action == "3":
-        auto_config_vlan(filtered_nr)
+        configure_svi_from_vlan(filtered_nr)
         
     elif action == "4":
         show_ip_interface(filtered_nr)
@@ -31,3 +32,6 @@ def automation_interface(filtered_nr, group_name):
         
     elif action == "6":
         return
+    
+    else:
+        print("Invalid selection. Please try again.")

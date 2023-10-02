@@ -98,3 +98,6 @@ def set_vlan(filtered_nr, group_name):
     
     elif action == "7":
         return
+    
+    else:
+        print("Invalid selection. Please try again.")

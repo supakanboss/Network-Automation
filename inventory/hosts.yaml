@@ -1,5 +1,5 @@
 ---
-RouterA:
+router-a:
   hostname: 172.16.1.11
   username: cpe
   password: "cpesecret"
@@ -10,7 +10,7 @@ RouterA:
     - router
     - router-a
 
-Core-SwitchA:
+core-switch-a:
   hostname: 172.16.1.12
   username: cpe
   password: "cpesecret"
@@ -19,9 +19,10 @@ Core-SwitchA:
     - all
     - rack1
     - switch
+    - core-switch
     - core-switch-a
 
-Access-SwitchA:
+access-switch-a:
   hostname: 172.16.1.13
   username: cpe
   password: "cpesecret"
@@ -30,9 +31,10 @@ Access-SwitchA:
     - all
     - rack1
     - switch
+    - access-switch
     - access-switch-a
 
-RouterB:
+router-b:
   hostname: 172.16.1.21
   username: cpe
   password: "cpesecret"
@@ -43,7 +45,7 @@ RouterB:
     - router
     - router-b
 
-Core-SwitchB:
+core-switch-b:
   hostname: 172.16.1.22
   username: cpe
   password: "cpesecret"
@@ -52,9 +54,10 @@ Core-SwitchB:
     - all
     - rack1
     - switch
+    - core-switch
     - core-switch-b
 
-Access-SwitchB:
+access-switch-b:
   hostname: 172.16.1.23
   username: cpe
   password: "cpesecret"
@@ -63,9 +66,10 @@ Access-SwitchB:
     - all
     - rack1
     - switch
+    - access-switch
     - access-switch-b
 
-RouterC:
+router-c:
   hostname: 172.16.1.31
   username: cpe
   password: "cpesecret"
@@ -76,7 +80,7 @@ RouterC:
     - router
     - router-c
 
-Core-SwitchC:
+core-switch-c:
   hostname: 172.16.1.32
   username: cpe
   password: "cpesecret"
@@ -85,9 +89,10 @@ Core-SwitchC:
     - all
     - rack1
     - switch
+    - core-switch
     - core-switch-c
 
-Access-SwitchC:
+access-switch-c:
   hostname: 172.16.1.33
   username: cpe
   password: "cpesecret"
@@ -96,9 +101,10 @@ Access-SwitchC:
     - all
     - rack1
     - switch
+    - access-switch
     - access-switch-c
 
-RouterD:
+router-d:
   hostname: 172.16.1.41
   username: cpe
   password: "cpesecret"
@@ -109,7 +115,7 @@ RouterD:
     - router
     - router-d
 
-Core-SwitchD:
+core-switch-d:
   hostname: 172.16.1.42
   username: cpe
   password: "cpesecret"
@@ -118,9 +124,10 @@ Core-SwitchD:
     - all
     - rack1
     - switch
+    - core-switch
     - core-switch-d
 
-Access-SwitchD:
+access-switch-d:
   hostname: 172.16.1.43
   username: cpe
   password: "cpesecret"
@@ -129,9 +136,10 @@ Access-SwitchD:
     - all
     - rack1
     - switch
+    - access-switch
     - access-switch-d
 
-RouterE:
+router-e:
   hostname: 172.16.1.51
   username: cpe
   password: "cpesecret"
@@ -142,7 +150,7 @@ RouterE:
     - router
     - router-e
 
-Core-SwitchE:
+core-switch-e:
   hostname: 172.16.1.52
   username: cpe
   password: "cpesecret"
@@ -151,9 +159,10 @@ Core-SwitchE:
     - all
     - rack1
     - switch
+    - core-switch
     - core-switch-e
 
-Access-SwitchE:
+access-switch-e:
   hostname: 172.16.1.53
   username: cpe
   password: "cpesecret"
@@ -162,9 +171,10 @@ Access-SwitchE:
     - all
     - rack1
     - switch
+    - access-switch
     - access-switch-e
 
-RouterF:
+router-f:
   hostname: 172.16.1.61
   username: cpe
   password: "cpesecret"
@@ -175,7 +185,7 @@ RouterF:
     - router
     - router-f
 
-Core-SwitchF:
+core-switch-f:
   hostname: 172.16.1.62
   username: cpe
   password: "cpesecret"
@@ -184,9 +194,10 @@ Core-SwitchF:
     - all
     - rack1
     - switch
+    - core-switch
     - core-switch-f
 
-Access-SwitchF:
+access-switch-f:
   hostname: 172.16.1.63
   username: cpe
   password: "cpesecret"
@@ -195,4 +206,5 @@ Access-SwitchF:
     - all
     - rack1
     - switch
+    - access-switch
     - access-switch-f

@@ -231,3 +231,6 @@ def show_data(filtered_nr, group_name):
         
     elif action == "18":
         return
+    
+    else:
+        print("Invalid selection. Please try again.")
