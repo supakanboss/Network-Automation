@@ -5,7 +5,7 @@ def auto_config_vlan(filtered_nr):
     
     num_vlans = int(input("How many VLANs do you want to create : "))
 
-    total_interfaces = 22
+    total_interfaces = 20
     interfaces_per_vlan = total_interfaces // num_vlans
 
     base_vlan_id = 100
