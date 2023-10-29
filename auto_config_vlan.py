@@ -29,7 +29,7 @@ def auto_config_vlan(filtered_nr):
                 "switchport mode access",
                 f"switchport access vlan {vlan}"
             ]
-            print(f"Assigned fa g1/0/{current_interface} to VLAN {vlan}")
+            print(f"Assigned g1/0/{current_interface} to VLAN {vlan}")
             current_interface += 1
 
     config_str = "\n".join(config_commands)
