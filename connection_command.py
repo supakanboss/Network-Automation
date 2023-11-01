@@ -1,6 +1,7 @@
 import json
 import logging
 import traceback
+from nornir import InitNornir
 from nornir.core.filter import F
 from netmiko import ConnectHandler
 
@@ -119,7 +120,7 @@ def filter_group(nr, group_name):
 
 def check_device_status(nr):
     print(f"Checking status of devices in the group:")
-    
+    nr = InitNornir(config_file="config.yaml")
     filtered_nr = nr.filter(F(groups__contains="all"))
     active_devices = []
     inactive_devices = []
